@@ -19,7 +19,7 @@ Author: Chris Lefkarites
 #define CHANNELS 1
 #define SIZE (RATE * CHANNELS) /* How many <data type> are in the sample. */
 
-#define FREQ 72
+#define FREQ 440
 
 #define PI 3.1415926
 
@@ -30,7 +30,7 @@ static Uint8 * head;
 
 /* Global audio buffer which holds our current oscillator shape. */
 static Sint16 sound [SIZE], buffer[SIZE];
-static SDL_Point points[RATE];
+static SDL_Point points[RATE] = { 0 };
 
 static Uint8 * end = (Uint8*) &sound[0] + SIZE * sizeof(Sint16);
 static int overlap, underlap;
@@ -78,13 +78,13 @@ void mixBuffer(void * userdata, Uint8 * stream, int len){
 
 }
 
-void sinWAV(){
+void sinWAV(int freq){
 	
 	for(int i = 0; i < SIZE; i += CHANNELS){
 
 		for(int j = 0; j < CHANNELS; j++){
 
-			sound [i+j] = 0x7FFF * sin( 2 * PI * FREQ * i / SIZE);
+			sound [i+j] = 0x7FFF * sin( 2 * PI * freq * i / SIZE);
 
 		}
 
@@ -92,13 +92,13 @@ void sinWAV(){
 	
 	//TODO - assign SDL_Point array.
 
-	/*
-	for(int i = 0; i < SIZE; i += CHANNELS){
-
-		points[i] = 
+	for(int i = 0; i < RATE; i++){
+		
+			points[i].x = SCREEN_WIDTH * i / (RATE / ZOOM);
+			points[i].y = SCREEN_HEIGHT * (sound[CHANNELS*i] + (int) 0x00007FFF) / (int) 0x0000FFFF;
 
 	}
-	*/
+
 }
 
 void plotWAV(){
@@ -123,8 +123,6 @@ int main(int argc, char* argv[]) {
 
 	int dcount;
 	
-	sinWAV();
-
 	createSpec(&spec, RATE, AUDIO_S16LSB, CHANNELS, 2048, mixBuffer);
 
 	if(SDL_Init(SDL_INIT_VIDEO)){
@@ -193,9 +191,82 @@ int main(int argc, char* argv[]) {
 
 				switch(event.key.keysym.sym){
 
-					case SDLK_a:
+					case SDLK_k:
+						
+						sinWAV(523);
 						SDL_PauseAudio(0);
-						printf("A");
+						break;
+
+					case SDLK_j:
+						
+						sinWAV(494);
+						SDL_PauseAudio(0);
+						break;
+
+					case SDLK_u:
+						
+						sinWAV(466);
+						SDL_PauseAudio(0);
+						break;
+
+					case SDLK_h:
+						
+						sinWAV(440);
+						SDL_PauseAudio(0);
+						break;
+
+					case SDLK_y:
+						
+						sinWAV(415);
+						SDL_PauseAudio(0);
+						break;
+
+					case SDLK_g:
+						
+						sinWAV(392);
+						SDL_PauseAudio(0);
+						break;
+
+					case SDLK_t:
+						
+						sinWAV(370);
+						SDL_PauseAudio(0);
+						break;
+
+					case SDLK_f:
+						
+						sinWAV(349);
+						SDL_PauseAudio(0);
+						break;
+
+					case SDLK_d:
+						
+						sinWAV(329);
+						SDL_PauseAudio(0);
+						break;
+
+					case SDLK_e:
+						
+						sinWAV(311);
+						SDL_PauseAudio(0);
+						break;
+
+					case SDLK_s:
+						
+						sinWAV(293);
+						SDL_PauseAudio(0);
+						break;
+
+					case SDLK_w:
+						
+						sinWAV(277);
+						SDL_PauseAudio(0);
+						break;
+
+					case SDLK_a:
+						
+						sinWAV(261);
+						SDL_PauseAudio(0);
 						break;
 
 					default:
@@ -209,8 +280,19 @@ int main(int argc, char* argv[]) {
 				switch(event.key.keysym.sym){
 
 					case SDLK_a:
+					case SDLK_w:
+					case SDLK_s:
+					case SDLK_e:
+					case SDLK_d:
+					case SDLK_f:
+					case SDLK_t:
+					case SDLK_g:
+					case SDLK_y:
+					case SDLK_h:
+					case SDLK_u:
+					case SDLK_j:
+					case SDLK_k:
 						SDL_PauseAudio(1);
-						printf("-A");
 						break;
 
 					default:
@@ -226,18 +308,7 @@ int main(int argc, char* argv[]) {
 		
 		SDL_SetRenderDrawColor( renderer, 0xFF, 0x00, 0x00, 0xFF );
 
-		prevpoint.x = 0;
-		prevpoint.y = SCREEN_HEIGHT / 2;
-
-		/* Render all objects TODO  */
-		for(int i = 0; i < (RATE / ZOOM); i++){
-			
-			point.x = SCREEN_WIDTH * i / (RATE / ZOOM);
-			point.y = SCREEN_HEIGHT * (sound[CHANNELS*i] + (int) 0x00007FFF) / (int) 0x0000FFFF;
-			SDL_RenderDrawLine( renderer, point.x, point.y, prevpoint.x, prevpoint.y );
-			prevpoint = point;
-
-		}
+		SDL_RenderDrawLines( renderer, points, RATE );
 
 		/* Draw a track head. */
 		point.x = SCREEN_WIDTH * (head - (Uint8*) &sound[0]) / (SIZE * sizeof(Sint16));
