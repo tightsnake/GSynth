@@ -30,6 +30,7 @@ static Uint8 * head;
 
 /* Global audio buffer which holds our current oscillator shape. */
 static Sint16 sound [SIZE], buffer[SIZE];
+static SDL_Point points[RATE];
 
 static Uint8 * end = (Uint8*) &sound[0] + SIZE * sizeof(Sint16);
 static int overlap, underlap;
@@ -88,7 +89,16 @@ void sinWAV(){
 		}
 
 	}
+	
+	//TODO - assign SDL_Point array.
 
+	/*
+	for(int i = 0; i < SIZE; i += CHANNELS){
+
+		points[i] = 
+
+	}
+	*/
 }
 
 void plotWAV(){
@@ -219,7 +229,7 @@ int main(int argc, char* argv[]) {
 		prevpoint.x = 0;
 		prevpoint.y = SCREEN_HEIGHT / 2;
 
-		/* Render all objects TODO  *//*
+		/* Render all objects TODO  */
 		for(int i = 0; i < (RATE / ZOOM); i++){
 			
 			point.x = SCREEN_WIDTH * i / (RATE / ZOOM);
@@ -229,8 +239,11 @@ int main(int argc, char* argv[]) {
 
 		}
 
-		*//* Draw a track head. */
+		/* Draw a track head. */
+		point.x = SCREEN_WIDTH * (head - (Uint8*) &sound[0]) / (SIZE * sizeof(Sint16));
 		
+		SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+		SDL_RenderDrawLine( renderer, point.x, 0, point.x, SCREEN_HEIGHT); 
 
 		SDL_RenderPresent( renderer );
 	}
