@@ -4,6 +4,8 @@ Author: Chris Lefkarites
 
  */
 
+#include "mixer.h"
+
 #include <SDL2/SDL.h>
 
 #include <stdio.h>
@@ -13,7 +15,7 @@ Author: Chris Lefkarites
 #include <math.h>
 
 #define SCREEN_WIDTH 1200
-#define SCREEN_HEIGHT 400
+#define SCREEN_HEIGHT 200
 
 #define RATE 44100
 #define CHANNELS 1
@@ -34,6 +36,8 @@ static SDL_Point points[RATE] = { 0 };
 
 static Uint8 * end = (Uint8*) &sound[0] + SIZE * sizeof(Sint16);
 static int overlap, underlap;
+
+static char octave = 0;
 
 SDL_AudioSpec * createSpec(SDL_AudioSpec * spec, int freq, SDL_AudioFormat format,
 		Uint8 channels, Uint16 samples, SDL_AudioCallback callback){
@@ -84,7 +88,7 @@ void sinWAV(int freq){
 
 		for(int j = 0; j < CHANNELS; j++){
 
-			sound [i+j] = 0x7FFF * sin( 2 * PI * freq * i / SIZE);
+			sound [i+j] = 0x7FFF * sin( 2 * PI * round(pow(2,octave) * freq) * i / SIZE);
 
 		}
 
@@ -98,12 +102,6 @@ void sinWAV(int freq){
 			points[i].y = SCREEN_HEIGHT * (sound[CHANNELS*i] + (int) 0x00007FFF) / (int) 0x0000FFFF;
 
 	}
-
-}
-
-void plotWAV(){
-
-	return;	
 
 }
 
@@ -191,82 +189,119 @@ int main(int argc, char* argv[]) {
 
 				switch(event.key.keysym.sym){
 
+					case SDLK_l:
+						
+						sinWAV(2*D);
+						SDL_PauseAudio(0);
+						lastNoteKey = event.key.keysym.sym;
+						break;
+
+					case SDLK_o:
+						
+						sinWAV(2*Cs);
+						SDL_PauseAudio(0);
+						lastNoteKey = event.key.keysym.sym;
+						break;
+
 					case SDLK_k:
 						
-						sinWAV(523);
+						sinWAV(2*C);
 						SDL_PauseAudio(0);
+						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_j:
 						
-						sinWAV(494);
+						sinWAV(B);
 						SDL_PauseAudio(0);
+						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_u:
 						
-						sinWAV(466);
+						sinWAV(As);
 						SDL_PauseAudio(0);
+						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_h:
 						
-						sinWAV(440);
+						sinWAV(A);
 						SDL_PauseAudio(0);
+						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_y:
 						
-						sinWAV(415);
+						sinWAV(Gs);
 						SDL_PauseAudio(0);
+						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_g:
 						
-						sinWAV(392);
+						sinWAV(G);
 						SDL_PauseAudio(0);
+						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_t:
 						
-						sinWAV(370);
+						sinWAV(Fs);
 						SDL_PauseAudio(0);
+						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_f:
 						
-						sinWAV(349);
+						sinWAV(F);
 						SDL_PauseAudio(0);
+						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_d:
 						
-						sinWAV(329);
+						sinWAV(E);
 						SDL_PauseAudio(0);
+						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_e:
 						
-						sinWAV(311);
+						sinWAV(Ds);
 						SDL_PauseAudio(0);
+						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_s:
 						
-						sinWAV(293);
+						sinWAV(D);
 						SDL_PauseAudio(0);
+						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_w:
 						
-						sinWAV(277);
+						sinWAV(Cs);
 						SDL_PauseAudio(0);
+						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_a:
 						
-						sinWAV(261);
+						sinWAV(C);
 						SDL_PauseAudio(0);
+						lastNoteKey = event.key.keysym.sym;
+						break;
+
+					case SDLK_z:
+
+						octave--;
+						break;
+
+					case SDLK_x:
+
+						octave++;
 						break;
 
 					default:
@@ -292,7 +327,9 @@ int main(int argc, char* argv[]) {
 					case SDLK_u:
 					case SDLK_j:
 					case SDLK_k:
-						SDL_PauseAudio(1);
+					case SDLK_o:
+					case SDLK_l:
+						if(lastNoteKey == event.key.keysym.sym) SDL_PauseAudio(1);
 						break;
 
 					default:
@@ -306,7 +343,7 @@ int main(int argc, char* argv[]) {
 
 		SDL_RenderClear( renderer );
 		
-		SDL_SetRenderDrawColor( renderer, 0xFF, 0x00, 0x00, 0xFF );
+		SDL_SetRenderDrawColor( renderer, 0xAA, 0x00, 0xFF, 0xFF );
 
 		SDL_RenderDrawLines( renderer, points, RATE );
 
