@@ -10,3 +10,7 @@ main.o: main.c
 
 clean:
 	del *.o *.exe *.sw*
+
+new:
+	mingw32-make clean
+	mingw32-make GSynth

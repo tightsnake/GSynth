@@ -23,14 +23,14 @@ Author: Chris Lefkarites
 
 #define ZOOM 1
 
-/* Length of the audio buffer in samples (both L & R). */
-static Uint8 * head;
+#define VOICES 15
+
+static Uint8 * head [VOICES], * end [VOICES];
 
 /* Global audio buffer which holds our current oscillator shape. */
-static Sint16 sound [SIZE], buffer[SIZE];
+static Sint16 sound [VOICES][SIZE], buffer [SIZE];
 static SDL_Point points[RATE] = { 0 };
 
-static Uint8 * end = (Uint8*) &sound[0] + SIZE * sizeof(Sint16);
 static int overlap, underlap;
 
 static char octave = 0;
@@ -39,6 +39,15 @@ static int SCREEN_WIDTH = 1200;
 static int SCREEN_HEIGHT = 200;
 
 static int FREQ = 417;
+
+static void initVoices(){
+
+	for(int i = 0; i < VOICES; i++) {
+		head[i] = (Uint8*) sound[i];
+		end[i] = (Uint8*) &sound[i][0] + SIZE * sizeof(Sint16);
+	}
+
+}
 
 SDL_AudioSpec * createSpec(SDL_AudioSpec * spec, int freq, SDL_AudioFormat format,
 		Uint8 channels, Uint16 samples, SDL_AudioCallback callback){
@@ -58,22 +67,78 @@ SDL_AudioSpec * createSpec(SDL_AudioSpec * spec, int freq, SDL_AudioFormat forma
 /* Circularly mixed audio buffer. */
 void mixBuffer(void * userdata, Uint8 * stream, int len){
 
-	overlap = end - head;
-	underlap = head + len - end;
+	SDL_Keycode * key;
+	int voiceIndex;
+
 
 	memset(stream, 0, len);
-
-	if(head + len > end){
-
-		memcpy((Uint8*) buffer, head, overlap);
-		memcpy((Uint8*) &buffer[0] + overlap, (Uint8*) sound, underlap);
-		head = (Uint8*) &sound[0] + underlap;
-		SDL_MixAudio(stream, (Uint8*) buffer, len, SDL_MIX_MAXVOLUME);
-
-	}else{
 	
-		SDL_MixAudio(stream, head, len, SDL_MIX_MAXVOLUME);
-		head += len;
+	while(key = getKeys(keyMap)){
+		
+		switch(*key){
+					case SDLK_a:
+						voiceIndex = 0;
+						break;
+					case SDLK_w:
+						voiceIndex = 1;
+						break;
+					case SDLK_s:
+						voiceIndex = 2;
+						break;
+					case SDLK_e:
+						voiceIndex = 3;
+						break;
+					case SDLK_d:
+						voiceIndex = 4;
+						break;
+					case SDLK_f:
+						voiceIndex = 5;
+						break;
+					case SDLK_t:
+						voiceIndex = 6;
+						break;
+					case SDLK_g:
+						voiceIndex = 7;
+						break;
+					case SDLK_y:
+						voiceIndex = 8;
+						break;
+					case SDLK_h:
+						voiceIndex = 9;
+						break;
+					case SDLK_u:
+						voiceIndex = 10;
+						break;
+					case SDLK_j:
+						voiceIndex = 11;
+						break;
+					case SDLK_k:
+						voiceIndex = 12;
+						break;
+					case SDLK_o:
+						voiceIndex = 13;
+						break;
+					case SDLK_l:
+						voiceIndex = 14;
+						break;
+		}
+	
+		overlap = end[voiceIndex] - head[voiceIndex];
+		underlap = head[voiceIndex] + len - end[voiceIndex];
+	
+		if(head[voiceIndex] + len > end[voiceIndex]){
+	
+			memcpy((Uint8*) buffer, head[voiceIndex], overlap);
+			memcpy((Uint8*) &buffer[0] + overlap, (Uint8*) sound[voiceIndex], underlap);
+			head[voiceIndex] = (Uint8*) &sound[voiceIndex][0] + underlap;
+			SDL_MixAudio(stream, (Uint8*) buffer, len, SDL_MIX_MAXVOLUME / keyMap->count);
+
+		}else{
+	
+			SDL_MixAudio(stream, head[voiceIndex], len, SDL_MIX_MAXVOLUME / keyMap->count);
+			head[voiceIndex] += len;
+
+		}
 
 	}
 
@@ -83,24 +148,24 @@ void mixBuffer(void * userdata, Uint8 * stream, int len){
 
 }
 
-void sinWAV(){
-	
+void sinWAV(int voiceIndex){
+
 	for(int i = 0; i < SIZE; i += CHANNELS){
 
 		for(int j = 0; j < CHANNELS; j++){
 
-			sound [i+j] = 0x7FFF * sin( 2 * PI * round(pow(2,octave) * FREQ) * i / SIZE);
+			sound [voiceIndex][i+j] = 0x7FFF * sin( 2 * PI * round(pow(2,octave) * FREQ) * i / SIZE);
 
 		}
 
 	}
 	
-	//TODO - assign SDL_Point array.
+	//TODO - Mix different signals into a final output.
 
 	for(int i = 0; i < RATE; i++){
 		
 			points[i].x = SCREEN_WIDTH * i / (RATE / ZOOM);
-			points[i].y = SCREEN_HEIGHT * (sound[CHANNELS*i] + (int) 0x00007FFF) / (int) 0x0000FFFF;
+			points[i].y = SCREEN_HEIGHT * (sound[voiceIndex][CHANNELS*i] + (int) 0x00007FFF) / (int) 0x0000FFFF;
 
 	}
 
@@ -116,11 +181,11 @@ int main(int argc, char* argv[]) {
 	
 	SDL_Point point, prevpoint;
 	
-	head = (Uint8*) sound;
-
 	int running = 1;
 
 	int dcount;
+
+	initVoices();
 
 	keyMap = createKeyMap( MAPSIZE );
 	
@@ -197,7 +262,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_l:
 						
 						FREQ = 2*D;
-						sinWAV();
+						sinWAV(14);
 						SDL_PauseAudio(0);
 						insertKey(keyMap, event.key.keysym.sym);
 						break;
@@ -205,7 +270,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_o:
 						
 						FREQ = 2*Cs;
-						sinWAV();
+						sinWAV(13);
 						SDL_PauseAudio(0);
 						insertKey(keyMap, event.key.keysym.sym);
 						break;
@@ -213,7 +278,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_k:
 						
 						FREQ = 2*C;
-						sinWAV();
+						sinWAV(12);
 						SDL_PauseAudio(0);
 						insertKey(keyMap, event.key.keysym.sym);
 						break;
@@ -221,7 +286,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_j:
 						
 						FREQ = B;
-						sinWAV();
+						sinWAV(11);
 						SDL_PauseAudio(0);
 						insertKey(keyMap, event.key.keysym.sym);
 						break;
@@ -229,7 +294,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_u:
 						
 						FREQ = As;
-						sinWAV();
+						sinWAV(10);
 						SDL_PauseAudio(0);
 						insertKey(keyMap, event.key.keysym.sym);
 						break;
@@ -237,7 +302,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_h:
 						
 						FREQ = A;
-						sinWAV();
+						sinWAV(9);
 						SDL_PauseAudio(0);
 						insertKey(keyMap, event.key.keysym.sym);
 						break;
@@ -245,7 +310,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_y:
 						
 						FREQ = Gs;
-						sinWAV();
+						sinWAV(8);
 						SDL_PauseAudio(0);
 						insertKey(keyMap, event.key.keysym.sym);
 						break;
@@ -253,7 +318,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_g:
 						
 						FREQ = G;
-						sinWAV();
+						sinWAV(7);
 						SDL_PauseAudio(0);
 						insertKey(keyMap, event.key.keysym.sym);
 						break;
@@ -261,7 +326,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_t:
 						
 						FREQ = Fs;
-						sinWAV();
+						sinWAV(6);
 						SDL_PauseAudio(0);
 						insertKey(keyMap, event.key.keysym.sym);
 						break;
@@ -269,7 +334,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_f:
 						
 						FREQ = F;
-						sinWAV();
+						sinWAV(5);
 						SDL_PauseAudio(0);
 						insertKey(keyMap, event.key.keysym.sym);
 						break;
@@ -277,7 +342,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_d:
 						
 						FREQ = E;
-						sinWAV();
+						sinWAV(4);
 						SDL_PauseAudio(0);
 						insertKey(keyMap, event.key.keysym.sym);
 						break;
@@ -285,7 +350,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_e:
 						
 						FREQ = Ds;
-						sinWAV();
+						sinWAV(3);
 						SDL_PauseAudio(0);
 						insertKey(keyMap, event.key.keysym.sym);
 						break;
@@ -293,7 +358,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_s:
 						
 						FREQ = D;
-						sinWAV();
+						sinWAV(2);
 						SDL_PauseAudio(0);
 						insertKey(keyMap, event.key.keysym.sym);
 						break;
@@ -301,7 +366,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_w:
 						
 						FREQ = Cs;
-						sinWAV();
+						sinWAV(1);
 						SDL_PauseAudio(0);
 						insertKey(keyMap, event.key.keysym.sym);
 						break;
@@ -309,7 +374,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_a:
 						
 						FREQ = C;
-						sinWAV();
+						sinWAV(0);
 						SDL_PauseAudio(0);
 						insertKey(keyMap, event.key.keysym.sym);
 						break;
@@ -333,7 +398,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 				}
-				printKeys(keyMap);
+				//printKeys(keyMap);
 			}
 
 			if(event.type == SDL_KEYUP){
@@ -356,14 +421,14 @@ int main(int argc, char* argv[]) {
 					case SDLK_o:
 					case SDLK_l:
 						removeKey(keyMap, event.key.keysym.sym);
-						SDL_PauseAudio(1);	
+						if(!keyMap->count) SDL_PauseAudio(1);	
 					break;
 
 					default:
 						break;
 
 				}
-				printKeys(keyMap);
+				//printKeys(keyMap);
 			}
 
 			if(event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED){
@@ -381,10 +446,11 @@ int main(int argc, char* argv[]) {
 		SDL_SetRenderDrawColor( renderer, 0xAA, 0x00, 0xFF, 0xFF );
 		SDL_RenderDrawLines( renderer, points, RATE );
 
-		/* Draw a track head. */
+		/* Draw a track head.
 		point.x = SCREEN_WIDTH * (head - (Uint8*) &sound[0]) / (SIZE * sizeof(Sint16));
 		SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
 		SDL_RenderDrawLine( renderer, point.x, 0, point.x, SCREEN_HEIGHT); 
+		*/
 
 		SDL_RenderPresent( renderer );
 		

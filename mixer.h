@@ -19,7 +19,7 @@ typedef struct KeyNode {
 } KeyNode;
 
 typedef struct{
-	int size;
+	int size, count;
 	KeyNode * keys;
 	KeyNode * listTail;
 } KeyMap;
@@ -53,15 +53,20 @@ static int insertKey( KeyMap * keyMap, SDL_Keycode key ){
 	}
 
 	keyMap->listTail = node;
+	keyMap->count++;
+	printf("count: %d\n",keyMap->count);
 
 	return 0;
 
 }
 
-static void removeKey( KeyMap * keyMap, SDL_Keycode key ){
+static int removeKey( KeyMap * keyMap, SDL_Keycode key ){
 	
 	int hash = key % keyMap->size;
 	KeyNode * node = &keyMap->keys[hash];
+
+	/* Key is already deleted. 0 reserved to identify empty cells. */
+	if(!node->key) return -1;
 
 	if(node == keyMap->listTail) {
 
@@ -77,7 +82,10 @@ static void removeKey( KeyMap * keyMap, SDL_Keycode key ){
 		
 	node->key = node->next = node->prev = 0;
 
-	return;
+	keyMap->count--;
+	printf("count: %d\n",keyMap->count);
+
+	return 0;
 
 }
 
@@ -88,6 +96,28 @@ static void printKeys(KeyMap * keyMap){
 		listTail = listTail->prev;
 	}
 	printf("\n");
+}
+
+static SDL_Keycode * getKeys(KeyMap * keyMap){
+
+	static KeyNode * listTail = 0;
+	static int flag = 0;
+
+	if(!flag) {
+
+		flag = 1;
+		listTail = keyMap->listTail;
+		if(listTail) return &listTail->key;
+
+	}else{
+
+		listTail = listTail->prev;
+		if(listTail) return &listTail->key;
+
+	}
+
+	flag = 0;
+
 }
 
 static KeyMap * keyMap;
