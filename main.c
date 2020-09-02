@@ -14,14 +14,10 @@ Author: Chris Lefkarites
 #include <limits.h>
 #include <math.h>
 
-#define SCREEN_WIDTH 1200
-#define SCREEN_HEIGHT 200
 
 #define RATE 44100
 #define CHANNELS 1
 #define SIZE (RATE * CHANNELS) /* How many <data type> are in the sample. */
-
-#define FREQ 440
 
 #define PI 3.1415926
 
@@ -38,6 +34,11 @@ static Uint8 * end = (Uint8*) &sound[0] + SIZE * sizeof(Sint16);
 static int overlap, underlap;
 
 static char octave = 0;
+
+static int SCREEN_WIDTH = 1200;
+static int SCREEN_HEIGHT = 200;
+
+static int FREQ = 417;
 
 SDL_AudioSpec * createSpec(SDL_AudioSpec * spec, int freq, SDL_AudioFormat format,
 		Uint8 channels, Uint16 samples, SDL_AudioCallback callback){
@@ -82,13 +83,13 @@ void mixBuffer(void * userdata, Uint8 * stream, int len){
 
 }
 
-void sinWAV(int freq){
+void sinWAV(){
 	
 	for(int i = 0; i < SIZE; i += CHANNELS){
 
 		for(int j = 0; j < CHANNELS; j++){
 
-			sound [i+j] = 0x7FFF * sin( 2 * PI * round(pow(2,octave) * freq) * i / SIZE);
+			sound [i+j] = 0x7FFF * sin( 2 * PI * round(pow(2,octave) * FREQ) * i / SIZE);
 
 		}
 
@@ -120,6 +121,8 @@ int main(int argc, char* argv[]) {
 	int running = 1;
 
 	int dcount;
+
+	keyMap = createKeyMap( MAPSIZE );
 	
 	createSpec(&spec, RATE, AUDIO_S16LSB, CHANNELS, 2048, mixBuffer);
 
@@ -167,6 +170,8 @@ int main(int argc, char* argv[]) {
 
 	}
 
+	SDL_SetWindowResizable( window, SDL_TRUE );
+
 	renderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED);
 	if(renderer == NULL){
 
@@ -191,107 +196,92 @@ int main(int argc, char* argv[]) {
 
 					case SDLK_l:
 						
-						sinWAV(2*D);
+						FREQ = 2*D;
 						SDL_PauseAudio(0);
-						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_o:
 						
-						sinWAV(2*Cs);
+						FREQ = 2*Cs;
 						SDL_PauseAudio(0);
-						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_k:
 						
-						sinWAV(2*C);
+						sinWAV(2*C);//TODO
 						SDL_PauseAudio(0);
-						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_j:
 						
 						sinWAV(B);
 						SDL_PauseAudio(0);
-						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_u:
 						
 						sinWAV(As);
 						SDL_PauseAudio(0);
-						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_h:
 						
 						sinWAV(A);
 						SDL_PauseAudio(0);
-						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_y:
 						
 						sinWAV(Gs);
 						SDL_PauseAudio(0);
-						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_g:
 						
 						sinWAV(G);
 						SDL_PauseAudio(0);
-						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_t:
 						
 						sinWAV(Fs);
 						SDL_PauseAudio(0);
-						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_f:
 						
 						sinWAV(F);
 						SDL_PauseAudio(0);
-						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_d:
 						
 						sinWAV(E);
 						SDL_PauseAudio(0);
-						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_e:
 						
 						sinWAV(Ds);
 						SDL_PauseAudio(0);
-						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_s:
 						
 						sinWAV(D);
 						SDL_PauseAudio(0);
-						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_w:
 						
 						sinWAV(Cs);
 						SDL_PauseAudio(0);
-						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_a:
 						
 						sinWAV(C);
 						SDL_PauseAudio(0);
-						lastNoteKey = event.key.keysym.sym;
 						break;
 
 					case SDLK_z:
@@ -304,6 +294,11 @@ int main(int argc, char* argv[]) {
 						octave++;
 						break;
 
+					case SDLK_ESCAPE:
+
+						running = 0;
+						break;
+						
 					default:
 						break;
 
@@ -329,27 +324,32 @@ int main(int argc, char* argv[]) {
 					case SDLK_k:
 					case SDLK_o:
 					case SDLK_l:
-						if(lastNoteKey == event.key.keysym.sym) SDL_PauseAudio(1);
-						break;
+						SDL_PauseAudio(1);	
+					break;
 
 					default:
 						break;
 
 				}
 			}
+
+			if(event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED){
+
+				SCREEN_WIDTH = event.window.data1;
+				SCREEN_HEIGHT = event.window.data2;
+				SDL_SetWindowSize( window, SCREEN_WIDTH, SCREEN_HEIGHT );
+
+			}
+
 		}
 	
 		SDL_SetRenderDrawColor( renderer, 0x00, 0x00, 0x00, 0xFF );
-
 		SDL_RenderClear( renderer );
-		
 		SDL_SetRenderDrawColor( renderer, 0xAA, 0x00, 0xFF, 0xFF );
-
 		SDL_RenderDrawLines( renderer, points, RATE );
 
 		/* Draw a track head. */
 		point.x = SCREEN_WIDTH * (head - (Uint8*) &sound[0]) / (SIZE * sizeof(Sint16));
-		
 		SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
 		SDL_RenderDrawLine( renderer, point.x, 0, point.x, SCREEN_HEIGHT); 
 
