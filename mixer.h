@@ -98,6 +98,7 @@ static void printKeys(KeyMap * keyMap){
 	printf("\n");
 }
 
+/* To be called with a while loop statement i.e. while(key = getKeys(keyMap)){} */
 static SDL_Keycode * getKeys(KeyMap * keyMap){
 
 	static KeyNode * listTail = 0;

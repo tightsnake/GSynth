@@ -70,7 +70,6 @@ void mixBuffer(void * userdata, Uint8 * stream, int len){
 	SDL_Keycode * key;
 	int voiceIndex;
 
-
 	memset(stream, 0, len);
 	
 	while(key = getKeys(keyMap)){
@@ -120,6 +119,8 @@ void mixBuffer(void * userdata, Uint8 * stream, int len){
 						break;
 					case SDLK_l:
 						voiceIndex = 14;
+						break;
+					default:
 						break;
 		}
 	
