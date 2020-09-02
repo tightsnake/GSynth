@@ -197,91 +197,121 @@ int main(int argc, char* argv[]) {
 					case SDLK_l:
 						
 						FREQ = 2*D;
+						sinWAV();
 						SDL_PauseAudio(0);
+						insertKey(keyMap, event.key.keysym.sym);
 						break;
 
 					case SDLK_o:
 						
 						FREQ = 2*Cs;
+						sinWAV();
 						SDL_PauseAudio(0);
+						insertKey(keyMap, event.key.keysym.sym);
 						break;
 
 					case SDLK_k:
 						
-						sinWAV(2*C);//TODO
+						FREQ = 2*C;
+						sinWAV();
 						SDL_PauseAudio(0);
+						insertKey(keyMap, event.key.keysym.sym);
 						break;
 
 					case SDLK_j:
 						
-						sinWAV(B);
+						FREQ = B;
+						sinWAV();
 						SDL_PauseAudio(0);
+						insertKey(keyMap, event.key.keysym.sym);
 						break;
 
 					case SDLK_u:
 						
-						sinWAV(As);
+						FREQ = As;
+						sinWAV();
 						SDL_PauseAudio(0);
+						insertKey(keyMap, event.key.keysym.sym);
 						break;
 
 					case SDLK_h:
 						
-						sinWAV(A);
+						FREQ = A;
+						sinWAV();
 						SDL_PauseAudio(0);
+						insertKey(keyMap, event.key.keysym.sym);
 						break;
 
 					case SDLK_y:
 						
-						sinWAV(Gs);
+						FREQ = Gs;
+						sinWAV();
 						SDL_PauseAudio(0);
+						insertKey(keyMap, event.key.keysym.sym);
 						break;
 
 					case SDLK_g:
 						
-						sinWAV(G);
+						FREQ = G;
+						sinWAV();
 						SDL_PauseAudio(0);
+						insertKey(keyMap, event.key.keysym.sym);
 						break;
 
 					case SDLK_t:
 						
-						sinWAV(Fs);
+						FREQ = Fs;
+						sinWAV();
 						SDL_PauseAudio(0);
+						insertKey(keyMap, event.key.keysym.sym);
 						break;
 
 					case SDLK_f:
 						
-						sinWAV(F);
+						FREQ = F;
+						sinWAV();
 						SDL_PauseAudio(0);
+						insertKey(keyMap, event.key.keysym.sym);
 						break;
 
 					case SDLK_d:
 						
-						sinWAV(E);
+						FREQ = E;
+						sinWAV();
 						SDL_PauseAudio(0);
+						insertKey(keyMap, event.key.keysym.sym);
 						break;
 
 					case SDLK_e:
 						
-						sinWAV(Ds);
+						FREQ = Ds;
+						sinWAV();
 						SDL_PauseAudio(0);
+						insertKey(keyMap, event.key.keysym.sym);
 						break;
 
 					case SDLK_s:
 						
-						sinWAV(D);
+						FREQ = D;
+						sinWAV();
 						SDL_PauseAudio(0);
+						insertKey(keyMap, event.key.keysym.sym);
 						break;
 
 					case SDLK_w:
 						
-						sinWAV(Cs);
+						FREQ = Cs;
+						sinWAV();
 						SDL_PauseAudio(0);
+						insertKey(keyMap, event.key.keysym.sym);
 						break;
 
 					case SDLK_a:
 						
-						sinWAV(C);
+						FREQ = C;
+						sinWAV();
 						SDL_PauseAudio(0);
+						insertKey(keyMap, event.key.keysym.sym);
 						break;
 
 					case SDLK_z:
@@ -303,6 +333,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 				}
+				printKeys(keyMap);
 			}
 
 			if(event.type == SDL_KEYUP){
@@ -324,6 +355,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_k:
 					case SDLK_o:
 					case SDLK_l:
+						removeKey(keyMap, event.key.keysym.sym);
 						SDL_PauseAudio(1);	
 					break;
 
@@ -331,6 +363,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 				}
+				printKeys(keyMap);
 			}
 
 			if(event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED){
@@ -354,6 +387,7 @@ int main(int argc, char* argv[]) {
 		SDL_RenderDrawLine( renderer, point.x, 0, point.x, SCREEN_HEIGHT); 
 
 		SDL_RenderPresent( renderer );
+		
 	}
 
 	SDL_CloseAudio();

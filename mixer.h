@@ -3,6 +3,7 @@
 Author: Chris Lefkarites
 
  */
+#include <stdio.h>
 
 #include <SDL2/SDL.h>
 
@@ -12,32 +13,32 @@ Author: Chris Lefkarites
 typedef enum { C = 262, Cs = 277, D = 294, Ds = 311, E = 330,
 	F = 349, Fs = 370, G = 392, Gs = 415, A = 440, As = 466, B = 494 } Tone;
 
-typedef struct Node {
+typedef struct KeyNode {
 	SDL_Keycode key;
-	struct Node * prev, * next;
-} Node;
+	struct KeyNode * prev, * next;
+} KeyNode;
 
 typedef struct{
 	int size;
-	Node * keys;
-	Node * listTail;
+	KeyNode * keys;
+	KeyNode * listTail;
 } KeyMap;
 
-KeyMap * createKeyMap( int size ){
+static KeyMap * createKeyMap( int size ){
 
 	KeyMap * keyMap;
 	keyMap = (KeyMap*) calloc( 1, sizeof(KeyMap) );
-	keyMap->keys = (Node*) calloc( size, sizeof(Node) );
+	keyMap->keys = (KeyNode*) calloc( size, sizeof(KeyNode) );
 	keyMap->size = size;
 
 	return keyMap;
 
 }
 
-int insertKey( KeyMap * keyMap, SDL_Keycode key ){
+static int insertKey( KeyMap * keyMap, SDL_Keycode key ){
 
 	int hash = key % keyMap->size;
-	Node * node = &keyMap->keys[hash];
+	KeyNode * node = &keyMap->keys[hash];
 
 	/* Do not allow a duplicate insertion or key value 0. */
 	if(node->key || !key ) return -1;
@@ -57,10 +58,10 @@ int insertKey( KeyMap * keyMap, SDL_Keycode key ){
 
 }
 
-void removeKey( KeyMap * keyMap, SDL_Keycode key ){
+static void removeKey( KeyMap * keyMap, SDL_Keycode key ){
 	
 	int hash = key % keyMap->size;
-	Node * node = &keyMap->keys[hash];
+	KeyNode * node = &keyMap->keys[hash];
 
 	if(node == keyMap->listTail) {
 
@@ -78,6 +79,15 @@ void removeKey( KeyMap * keyMap, SDL_Keycode key ){
 
 	return;
 
+}
+
+static void printKeys(KeyMap * keyMap){
+	KeyNode * listTail = keyMap->listTail;
+	while(listTail){
+		printf("%d ", listTail->key);
+		listTail = listTail->prev;
+	}
+	printf("\n");
 }
 
 static KeyMap * keyMap;
