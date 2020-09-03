@@ -40,6 +40,58 @@ static int SCREEN_HEIGHT = 200;
 
 static int FREQ = 417;
 
+static void setVoiceIndex(SDL_Keycode * key, int * voiceIndex) {
+	switch(*key){
+		case SDLK_a:
+			*voiceIndex = 0;
+			break;
+		case SDLK_w:
+			*voiceIndex = 1;
+			break;
+		case SDLK_s:
+			*voiceIndex = 2;
+			break;
+		case SDLK_e:
+			*voiceIndex = 3;
+			break;
+		case SDLK_d:
+			*voiceIndex = 4;
+			break;
+		case SDLK_f:
+			*voiceIndex = 5;
+			break;
+		case SDLK_t:
+			*voiceIndex = 6;
+			break;
+		case SDLK_g:
+			*voiceIndex = 7;
+			break;
+		case SDLK_y:
+			*voiceIndex = 8;
+			break;
+		case SDLK_h:
+			*voiceIndex = 9;
+			break;
+		case SDLK_u:
+			*voiceIndex = 10;
+			break;
+		case SDLK_j:
+			*voiceIndex = 11;
+			break;
+		case SDLK_k:
+			*voiceIndex = 12;
+			break;
+		case SDLK_o:
+			*voiceIndex = 13;
+			break;
+		case SDLK_l:
+			*voiceIndex = 14;
+			break;
+		default:
+			break;
+	}
+}
+
 static void initVoices(){
 
 	for(int i = 0; i < VOICES; i++) {
@@ -71,71 +123,23 @@ void mixBuffer(void * userdata, Uint8 * stream, int len){
 	int voiceIndex;
 
 	memset(stream, 0, len);
-	
+
 	while(key = getKeys(keyMap)){
-		
-		switch(*key){
-					case SDLK_a:
-						voiceIndex = 0;
-						break;
-					case SDLK_w:
-						voiceIndex = 1;
-						break;
-					case SDLK_s:
-						voiceIndex = 2;
-						break;
-					case SDLK_e:
-						voiceIndex = 3;
-						break;
-					case SDLK_d:
-						voiceIndex = 4;
-						break;
-					case SDLK_f:
-						voiceIndex = 5;
-						break;
-					case SDLK_t:
-						voiceIndex = 6;
-						break;
-					case SDLK_g:
-						voiceIndex = 7;
-						break;
-					case SDLK_y:
-						voiceIndex = 8;
-						break;
-					case SDLK_h:
-						voiceIndex = 9;
-						break;
-					case SDLK_u:
-						voiceIndex = 10;
-						break;
-					case SDLK_j:
-						voiceIndex = 11;
-						break;
-					case SDLK_k:
-						voiceIndex = 12;
-						break;
-					case SDLK_o:
-						voiceIndex = 13;
-						break;
-					case SDLK_l:
-						voiceIndex = 14;
-						break;
-					default:
-						break;
-		}
-	
+
+		setVoiceIndex(key, &voiceIndex);
+
 		overlap = end[voiceIndex] - head[voiceIndex];
 		underlap = head[voiceIndex] + len - end[voiceIndex];
-	
+
 		if(head[voiceIndex] + len > end[voiceIndex]){
-	
+
 			memcpy((Uint8*) buffer, head[voiceIndex], overlap);
 			memcpy((Uint8*) &buffer[0] + overlap, (Uint8*) sound[voiceIndex], underlap);
 			head[voiceIndex] = (Uint8*) &sound[voiceIndex][0] + underlap;
 			SDL_MixAudio(stream, (Uint8*) buffer, len, SDL_MIX_MAXVOLUME / keyMap->count);
 
 		}else{
-	
+
 			SDL_MixAudio(stream, head[voiceIndex], len, SDL_MIX_MAXVOLUME / keyMap->count);
 			head[voiceIndex] += len;
 
@@ -160,15 +164,16 @@ void sinWAV(int voiceIndex){
 		}
 
 	}
-	
+
 	//TODO - Mix different signals into a final output.
+	/*
+	   for(int i = 0; i < RATE; i++){
 
-	for(int i = 0; i < RATE; i++){
-		
-			points[i].x = SCREEN_WIDTH * i / (RATE / ZOOM);
-			points[i].y = SCREEN_HEIGHT * (sound[voiceIndex][CHANNELS*i] + (int) 0x00007FFF) / (int) 0x0000FFFF;
+	   points[i].x = SCREEN_WIDTH * i / (RATE / ZOOM);
+	   points[i].y = SCREEN_HEIGHT * (sound[voiceIndex][CHANNELS*i] + (int) 0x00007FFF) / (int) 0x0000FFFF;
 
-	}
+	   }
+	 */
 
 }
 
@@ -179,9 +184,9 @@ int main(int argc, char* argv[]) {
 	SDL_Event event;
 	SDL_AudioSpec spec, obtained;
 	SDL_AudioDeviceID device;
-	
+
 	SDL_Point point, prevpoint;
-	
+
 	int running = 1;
 
 	int dcount;
@@ -189,7 +194,7 @@ int main(int argc, char* argv[]) {
 	initVoices();
 
 	keyMap = createKeyMap( MAPSIZE );
-	
+
 	createSpec(&spec, RATE, AUDIO_S16LSB, CHANNELS, 2048, mixBuffer);
 
 	if(SDL_Init(SDL_INIT_VIDEO)){
@@ -261,7 +266,7 @@ int main(int argc, char* argv[]) {
 				switch(event.key.keysym.sym){
 
 					case SDLK_l:
-						
+
 						FREQ = 2*D;
 						sinWAV(14);
 						SDL_PauseAudio(0);
@@ -269,7 +274,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 					case SDLK_o:
-						
+
 						FREQ = 2*Cs;
 						sinWAV(13);
 						SDL_PauseAudio(0);
@@ -277,7 +282,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 					case SDLK_k:
-						
+
 						FREQ = 2*C;
 						sinWAV(12);
 						SDL_PauseAudio(0);
@@ -285,7 +290,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 					case SDLK_j:
-						
+
 						FREQ = B;
 						sinWAV(11);
 						SDL_PauseAudio(0);
@@ -293,7 +298,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 					case SDLK_u:
-						
+
 						FREQ = As;
 						sinWAV(10);
 						SDL_PauseAudio(0);
@@ -301,7 +306,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 					case SDLK_h:
-						
+
 						FREQ = A;
 						sinWAV(9);
 						SDL_PauseAudio(0);
@@ -309,7 +314,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 					case SDLK_y:
-						
+
 						FREQ = Gs;
 						sinWAV(8);
 						SDL_PauseAudio(0);
@@ -317,7 +322,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 					case SDLK_g:
-						
+
 						FREQ = G;
 						sinWAV(7);
 						SDL_PauseAudio(0);
@@ -325,7 +330,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 					case SDLK_t:
-						
+
 						FREQ = Fs;
 						sinWAV(6);
 						SDL_PauseAudio(0);
@@ -333,7 +338,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 					case SDLK_f:
-						
+
 						FREQ = F;
 						sinWAV(5);
 						SDL_PauseAudio(0);
@@ -341,7 +346,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 					case SDLK_d:
-						
+
 						FREQ = E;
 						sinWAV(4);
 						SDL_PauseAudio(0);
@@ -349,7 +354,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 					case SDLK_e:
-						
+
 						FREQ = Ds;
 						sinWAV(3);
 						SDL_PauseAudio(0);
@@ -357,7 +362,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 					case SDLK_s:
-						
+
 						FREQ = D;
 						sinWAV(2);
 						SDL_PauseAudio(0);
@@ -365,7 +370,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 					case SDLK_w:
-						
+
 						FREQ = Cs;
 						sinWAV(1);
 						SDL_PauseAudio(0);
@@ -373,7 +378,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 					case SDLK_a:
-						
+
 						FREQ = C;
 						sinWAV(0);
 						SDL_PauseAudio(0);
@@ -394,7 +399,7 @@ int main(int argc, char* argv[]) {
 
 						running = 0;
 						break;
-						
+
 					default:
 						break;
 
@@ -423,7 +428,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_l:
 						removeKey(keyMap, event.key.keysym.sym);
 						if(!keyMap->count) SDL_PauseAudio(1);	
-					break;
+						break;
 
 					default:
 						break;
@@ -441,20 +446,23 @@ int main(int argc, char* argv[]) {
 			}
 
 		}
-	
+
 		SDL_SetRenderDrawColor( renderer, 0x00, 0x00, 0x00, 0xFF );
 		SDL_RenderClear( renderer );
-		SDL_SetRenderDrawColor( renderer, 0xAA, 0x00, 0xFF, 0xFF );
-		SDL_RenderDrawLines( renderer, points, RATE );
+
+		/* Draw Wave Form.
+		   SDL_SetRenderDrawColor( renderer, 0xAA, 0x00, 0xFF, 0xFF );
+		   SDL_RenderDrawLines( renderer, points, RATE );
+		 */
 
 		/* Draw a track head.
-		point.x = SCREEN_WIDTH * (head - (Uint8*) &sound[0]) / (SIZE * sizeof(Sint16));
-		SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
-		SDL_RenderDrawLine( renderer, point.x, 0, point.x, SCREEN_HEIGHT); 
-		*/
+		   point.x = SCREEN_WIDTH * (head - (Uint8*) &sound[0]) / (SIZE * sizeof(Sint16));
+		   SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+		   SDL_RenderDrawLine( renderer, point.x, 0, point.x, SCREEN_HEIGHT); 
+		 */
 
 		SDL_RenderPresent( renderer );
-		
+
 	}
 
 	SDL_CloseAudio();
