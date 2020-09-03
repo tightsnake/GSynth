@@ -119,6 +119,8 @@ static SDL_Keycode * getKeys(KeyMap * keyMap){
 
 	flag = 0;
 
+	return 0;
+
 }
 
 static KeyMap * keyMap;
