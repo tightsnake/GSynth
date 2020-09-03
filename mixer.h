@@ -54,7 +54,7 @@ static int insertKey( KeyMap * keyMap, SDL_Keycode key ){
 
 	keyMap->listTail = node;
 	keyMap->count++;
-	printf("count: %d\n",keyMap->count);
+	//printf("count: %d\n",keyMap->count);
 
 	return 0;
 
@@ -83,7 +83,7 @@ static int removeKey( KeyMap * keyMap, SDL_Keycode key ){
 	node->key = node->next = node->prev = 0;
 
 	keyMap->count--;
-	printf("count: %d\n",keyMap->count);
+	//printf("count: %d\n",keyMap->count);
 
 	return 0;
 

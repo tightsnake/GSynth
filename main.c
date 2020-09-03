@@ -38,56 +38,59 @@ static char octave = 0;
 static int SCREEN_WIDTH = 1200;
 static int SCREEN_HEIGHT = 200;
 
-static int FREQ = 417;
+static const Tone FREQ[VOICES] = {
+	C, Cs, D, Ds, E, F, Fs, G, Gs, A, As, B, 2*C, 2*Cs, 2*D
+};
 
-static void setVoiceIndex(SDL_Keycode * key, int * voiceIndex) {
+static int getVoiceIndex(SDL_Keycode * key) {
 	switch(*key){
 		case SDLK_a:
-			*voiceIndex = 0;
+			return 0;
 			break;
 		case SDLK_w:
-			*voiceIndex = 1;
+			return 1;
 			break;
 		case SDLK_s:
-			*voiceIndex = 2;
+			return 2;
 			break;
 		case SDLK_e:
-			*voiceIndex = 3;
+			return 3;
 			break;
 		case SDLK_d:
-			*voiceIndex = 4;
+			return 4;
 			break;
 		case SDLK_f:
-			*voiceIndex = 5;
+			return 5;
 			break;
 		case SDLK_t:
-			*voiceIndex = 6;
+			return 6;
 			break;
 		case SDLK_g:
-			*voiceIndex = 7;
+			return 7;
 			break;
 		case SDLK_y:
-			*voiceIndex = 8;
+			return 8;
 			break;
 		case SDLK_h:
-			*voiceIndex = 9;
+			return 9;
 			break;
 		case SDLK_u:
-			*voiceIndex = 10;
+			return 10;
 			break;
 		case SDLK_j:
-			*voiceIndex = 11;
+			return 11;
 			break;
 		case SDLK_k:
-			*voiceIndex = 12;
+			return 12;
 			break;
 		case SDLK_o:
-			*voiceIndex = 13;
+			return 13;
 			break;
 		case SDLK_l:
-			*voiceIndex = 14;
+			return 14;
 			break;
 		default:
+			return -1;
 			break;
 	}
 }
@@ -126,7 +129,7 @@ void mixBuffer(void * userdata, Uint8 * stream, int len){
 
 	while(key = getKeys(keyMap)){
 
-		setVoiceIndex(key, &voiceIndex);
+		voiceIndex = getVoiceIndex(key);
 
 		overlap = end[voiceIndex] - head[voiceIndex];
 		underlap = head[voiceIndex] + len - end[voiceIndex];
@@ -153,17 +156,19 @@ void mixBuffer(void * userdata, Uint8 * stream, int len){
 
 }
 
-void sinWAV(int voiceIndex){
+void prepareVoices(){ //TODO
 
-	for(int i = 0; i < SIZE; i += CHANNELS){
+	for(int k = 0; k < VOICES; k++)
 
-		for(int j = 0; j < CHANNELS; j++){
+		for(int i = 0; i < SIZE; i += CHANNELS){
 
-			sound [voiceIndex][i+j] = 0x7FFF * sin( 2 * PI * round(pow(2,octave) * FREQ) * i / SIZE);
+			for(int j = 0; j < CHANNELS; j++){
+
+				sound [k][i+j] = 0x7FFF * sin( 2 * PI * round(pow(2,octave) * FREQ[k]) * i / SIZE);
+
+			}
 
 		}
-
-	}
 
 	//TODO - Mix different signals into a final output.
 	/*
@@ -192,6 +197,7 @@ int main(int argc, char* argv[]) {
 	int dcount;
 
 	initVoices();
+	prepareVoices();
 
 	keyMap = createKeyMap( MAPSIZE );
 
@@ -266,133 +272,35 @@ int main(int argc, char* argv[]) {
 				switch(event.key.keysym.sym){
 
 					case SDLK_l:
-
-						FREQ = 2*D;
-						sinWAV(14);
-						SDL_PauseAudio(0);
-						insertKey(keyMap, event.key.keysym.sym);
-						break;
-
 					case SDLK_o:
-
-						FREQ = 2*Cs;
-						sinWAV(13);
-						SDL_PauseAudio(0);
-						insertKey(keyMap, event.key.keysym.sym);
-						break;
-
 					case SDLK_k:
-
-						FREQ = 2*C;
-						sinWAV(12);
-						SDL_PauseAudio(0);
-						insertKey(keyMap, event.key.keysym.sym);
-						break;
-
 					case SDLK_j:
-
-						FREQ = B;
-						sinWAV(11);
-						SDL_PauseAudio(0);
-						insertKey(keyMap, event.key.keysym.sym);
-						break;
-
 					case SDLK_u:
-
-						FREQ = As;
-						sinWAV(10);
-						SDL_PauseAudio(0);
-						insertKey(keyMap, event.key.keysym.sym);
-						break;
-
 					case SDLK_h:
-
-						FREQ = A;
-						sinWAV(9);
-						SDL_PauseAudio(0);
-						insertKey(keyMap, event.key.keysym.sym);
-						break;
-
 					case SDLK_y:
-
-						FREQ = Gs;
-						sinWAV(8);
-						SDL_PauseAudio(0);
-						insertKey(keyMap, event.key.keysym.sym);
-						break;
-
 					case SDLK_g:
-
-						FREQ = G;
-						sinWAV(7);
-						SDL_PauseAudio(0);
-						insertKey(keyMap, event.key.keysym.sym);
-						break;
-
 					case SDLK_t:
-
-						FREQ = Fs;
-						sinWAV(6);
-						SDL_PauseAudio(0);
-						insertKey(keyMap, event.key.keysym.sym);
-						break;
-
 					case SDLK_f:
-
-						FREQ = F;
-						sinWAV(5);
-						SDL_PauseAudio(0);
-						insertKey(keyMap, event.key.keysym.sym);
-						break;
-
 					case SDLK_d:
-
-						FREQ = E;
-						sinWAV(4);
-						SDL_PauseAudio(0);
-						insertKey(keyMap, event.key.keysym.sym);
-						break;
-
 					case SDLK_e:
-
-						FREQ = Ds;
-						sinWAV(3);
-						SDL_PauseAudio(0);
-						insertKey(keyMap, event.key.keysym.sym);
-						break;
-
 					case SDLK_s:
-
-						FREQ = D;
-						sinWAV(2);
-						SDL_PauseAudio(0);
-						insertKey(keyMap, event.key.keysym.sym);
-						break;
-
 					case SDLK_w:
-
-						FREQ = Cs;
-						sinWAV(1);
-						SDL_PauseAudio(0);
-						insertKey(keyMap, event.key.keysym.sym);
-						break;
-
 					case SDLK_a:
 
-						FREQ = C;
-						sinWAV(0);
-						SDL_PauseAudio(0);
 						insertKey(keyMap, event.key.keysym.sym);
+						SDL_PauseAudio(0);
 						break;
 
 					case SDLK_z:
 
 						octave--;
+						prepareVoices();
 						break;
 
 					case SDLK_x:
 
 						octave++;
+						prepareVoices();
 						break;
 
 					case SDLK_ESCAPE:
@@ -411,21 +319,21 @@ int main(int argc, char* argv[]) {
 
 				switch(event.key.keysym.sym){
 
-					case SDLK_a:
-					case SDLK_w:
-					case SDLK_s:
-					case SDLK_e:
-					case SDLK_d:
-					case SDLK_f:
-					case SDLK_t:
-					case SDLK_g:
-					case SDLK_y:
-					case SDLK_h:
-					case SDLK_u:
-					case SDLK_j:
-					case SDLK_k:
-					case SDLK_o:
 					case SDLK_l:
+					case SDLK_o:
+					case SDLK_k:
+					case SDLK_j:
+					case SDLK_u:
+					case SDLK_h:
+					case SDLK_y:
+					case SDLK_g:
+					case SDLK_t:
+					case SDLK_f:
+					case SDLK_d:
+					case SDLK_e:
+					case SDLK_s:
+					case SDLK_w:
+					case SDLK_a:
 						removeKey(keyMap, event.key.keysym.sym);
 						if(!keyMap->count) SDL_PauseAudio(1);	
 						break;
