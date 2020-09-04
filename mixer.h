@@ -19,7 +19,7 @@ typedef struct KeyNode {
 } KeyNode;
 
 typedef struct{
-	int size, count;
+	int size, count, lastCount;
 	KeyNode * keys;
 	KeyNode * listTail;
 } KeyMap;
@@ -91,6 +91,7 @@ static int removeKey( KeyMap * keyMap, SDL_Keycode key ){
 
 static void printKeys(KeyMap * keyMap){
 	KeyNode * listTail = keyMap->listTail;
+	printf("count %d: ", keyMap->count);
 	while(listTail){
 		printf("%d ", listTail->key);
 		listTail = listTail->prev;

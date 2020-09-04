@@ -21,7 +21,7 @@ Author: Chris Lefkarites
 
 #define PI 3.1415926
 
-#define ZOOM 1
+#define ZOOM 5
 
 #define VOICES 15
 
@@ -29,6 +29,7 @@ static Uint8 * head [VOICES], * end [VOICES];
 
 /* Global audio buffer which holds our current oscillator shape. */
 static Sint16 sound [VOICES][SIZE], buffer [SIZE];
+
 static SDL_Point points[RATE] = { 0 };
 
 static int overlap, underlap;
@@ -99,7 +100,7 @@ static void initVoices(){
 
 	for(int i = 0; i < VOICES; i++) {
 		head[i] = (Uint8*) sound[i];
-		end[i] = (Uint8*) &sound[i][0] + SIZE * sizeof(Sint16);
+		end[i] = (Uint8*) sound[i] + SIZE * sizeof(Sint16);
 	}
 
 }
@@ -127,7 +128,7 @@ void mixBuffer(void * userdata, Uint8 * stream, int len){
 
 	memset(stream, 0, len);
 
-	while(key = getKeys(keyMap)){
+	while((key = getKeys(keyMap))){
 
 		voiceIndex = getVoiceIndex(key);
 
@@ -182,6 +183,33 @@ void prepareVoices(){ //TODO
 
 }
 
+void updateGraphics(){
+
+	SDL_Keycode * key;
+	int voiceIndex;
+
+	memset( points, 0, sizeof(SDL_Point) * RATE);
+
+	while((key = getKeys(keyMap))) {
+
+		voiceIndex = getVoiceIndex(key);
+
+		for(int i = 0; i < (RATE / ZOOM); i++){
+
+			/* TODO - Fix the math and drawing bug. */
+
+			points[i].x = SCREEN_WIDTH * i / (RATE / ZOOM);
+			points[i].y += ((float) SCREEN_HEIGHT / (float) keyMap->count)
+				* (((int)sound[voiceIndex][CHANNELS*i] + (int) 0x00008000) / (float) 0x0000FFFF);
+
+		}
+
+	}
+
+	return;
+
+}
+
 int main(int argc, char* argv[]) {
 
 	SDL_Window * window;
@@ -201,7 +229,7 @@ int main(int argc, char* argv[]) {
 
 	keyMap = createKeyMap( MAPSIZE );
 
-	createSpec(&spec, RATE, AUDIO_S16LSB, CHANNELS, 2048, mixBuffer);
+	createSpec(&spec, RATE, AUDIO_S16LSB, CHANNELS, 4096, mixBuffer);
 
 	if(SDL_Init(SDL_INIT_VIDEO)){
 
@@ -223,6 +251,8 @@ int main(int argc, char* argv[]) {
 	}
 
 	device = SDL_OpenAudio(&spec, NULL);
+
+	fprintf(stderr, "Audio Specification : samples %d channels %d\n", spec.samples, spec.channels);
 
 	if(device){
 
@@ -287,8 +317,20 @@ int main(int argc, char* argv[]) {
 					case SDLK_w:
 					case SDLK_a:
 
+						/* TODO - Logic Block in Question. */
+
 						insertKey(keyMap, event.key.keysym.sym);
-						SDL_PauseAudio(0);
+						
+						printKeys(keyMap);
+
+						if(keyMap->lastCount != keyMap->count){
+
+							SDL_PauseAudio(0);
+							updateGraphics();
+							keyMap->lastCount = keyMap->count;
+
+						}
+
 						break;
 
 					case SDLK_z:
@@ -334,8 +376,19 @@ int main(int argc, char* argv[]) {
 					case SDLK_s:
 					case SDLK_w:
 					case SDLK_a:
+
 						removeKey(keyMap, event.key.keysym.sym);
-						if(!keyMap->count) SDL_PauseAudio(1);	
+
+						printKeys(keyMap);
+
+						if(keyMap->lastCount != keyMap->count){
+
+							if(!keyMap->count) SDL_PauseAudio(1);
+							updateGraphics();
+							keyMap->lastCount = keyMap->count;
+						
+						}
+
 						break;
 
 					default:
@@ -358,10 +411,9 @@ int main(int argc, char* argv[]) {
 		SDL_SetRenderDrawColor( renderer, 0x00, 0x00, 0x00, 0xFF );
 		SDL_RenderClear( renderer );
 
-		/* Draw Wave Form.
-		   SDL_SetRenderDrawColor( renderer, 0xAA, 0x00, 0xFF, 0xFF );
-		   SDL_RenderDrawLines( renderer, points, RATE );
-		 */
+		/* Draw Wave Form. */
+		SDL_SetRenderDrawColor( renderer, 0x00, 0xFF, 0x00, 0xFF );
+		SDL_RenderDrawLines( renderer, points, RATE/ZOOM );
 
 		/* Draw a track head.
 		   point.x = SCREEN_WIDTH * (head - (Uint8*) &sound[0]) / (SIZE * sizeof(Sint16));
