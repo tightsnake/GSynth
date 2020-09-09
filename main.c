@@ -4,8 +4,7 @@ Author: Chris Lefkarites
 
  */
 
-#include "gsynth.h"
-
+#include "mixer.h"
 
 int main(int argc, char* argv[]) {
 
@@ -15,16 +14,13 @@ int main(int argc, char* argv[]) {
 	SDL_AudioSpec spec;
 	SDL_AudioDeviceID device;
 
+	GSynth * gsynth = createGSynth();
+
 	int running = 1;
 
 	int dcount;
 
-	initVoices();
-	prepareVoices();
-
-	keyMap = createKeyMap( MAPSIZE );
-
-	createSpec(&spec, RATE, AUDIO_S16LSB, CHANNELS, 4096, mixBuffer);
+	createSpec(&spec, RATE, AUDIO_S16LSB, CHANNELS, 4096, mixBuffer, gsynth);
 
 	if(SDL_Init(SDL_INIT_VIDEO)){
 
@@ -60,8 +56,8 @@ int main(int argc, char* argv[]) {
 			"GSynth",
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
-			SCREEN_WIDTH,
-			SCREEN_HEIGHT,
+			gsynth->screenWidth,
+			gsynth->screenHeight,
 			SDL_WINDOW_OPENGL
 			);
 
@@ -114,15 +110,15 @@ int main(int argc, char* argv[]) {
 
 						/* TODO - Logic Block in Question. */
 
-						insertKey(keyMap, event.key.keysym.sym);
-						
-						printKeys(keyMap);
+						insertKey(gsynth->keyMap, event.key.keysym.sym);
 
-						if(keyMap->lastCount != keyMap->count){
+						printKeys(gsynth->keyMap);
+
+						if(gsynth->keyMap->lastCount != gsynth->keyMap->count){
 
 							SDL_PauseAudio(0);
-							updateGraphics();
-							keyMap->lastCount = keyMap->count;
+							updateGraphics(gsynth);
+							gsynth->keyMap->lastCount = gsynth->keyMap->count;
 
 						}
 
@@ -130,14 +126,14 @@ int main(int argc, char* argv[]) {
 
 					case SDLK_z:
 
-						octave--;
-						prepareVoices();
+						gsynth->octave--;
+						prepareVoices(gsynth);
 						break;
 
 					case SDLK_x:
 
-						octave++;
-						prepareVoices();
+						gsynth->octave++;
+						prepareVoices(gsynth);
 						break;
 
 					case SDLK_ESCAPE:
@@ -149,7 +145,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 				}
-				//printKeys(keyMap);
+				//printKeys(gsynth->keyMap);
 			}
 
 			if(event.type == SDL_KEYUP){
@@ -172,16 +168,16 @@ int main(int argc, char* argv[]) {
 					case SDLK_w:
 					case SDLK_a:
 
-						removeKey(keyMap, event.key.keysym.sym);
+						removeKey(gsynth->keyMap, event.key.keysym.sym);
 
-						printKeys(keyMap);
+						printKeys(gsynth->keyMap);
 
-						if(keyMap->lastCount != keyMap->count){
+						if(gsynth->keyMap->lastCount != gsynth->keyMap->count){
 
-							if(!keyMap->count) SDL_PauseAudio(1);
-							updateGraphics();
-							keyMap->lastCount = keyMap->count;
-						
+							if(!gsynth->keyMap->count) SDL_PauseAudio(1);
+							updateGraphics(gsynth);
+							gsynth->keyMap->lastCount = gsynth->keyMap->count;
+
 						}
 
 						break;
@@ -190,14 +186,14 @@ int main(int argc, char* argv[]) {
 						break;
 
 				}
-				//printKeys(keyMap);
+				//printKeys(gsynth->keyMap);
 			}
 
 			if(event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED){
 
-				SCREEN_WIDTH = event.window.data1;
-				SCREEN_HEIGHT = event.window.data2;
-				SDL_SetWindowSize( window, SCREEN_WIDTH, SCREEN_HEIGHT );
+				gsynth->screenWidth = event.window.data1;
+				gsynth->screenHeight = event.window.data2;
+				SDL_SetWindowSize( window, gsynth->screenWidth, gsynth->screenHeight );
 
 			}
 
@@ -208,12 +204,12 @@ int main(int argc, char* argv[]) {
 
 		/* Draw Wave Form. */
 		SDL_SetRenderDrawColor( renderer, 0x00, 0xFF, 0x00, 0xFF );
-		SDL_RenderDrawLines( renderer, points, RATE/ZOOM );
+		SDL_RenderDrawLines( renderer, gsynth->points, RATE/ZOOM );
 
 		/* Draw a track head.
-		   point.x = SCREEN_WIDTH * (head - (Uint8*) &sound[0]) / (SIZE * sizeof(Sint16));
-		   SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
-		   SDL_RenderDrawLine( renderer, point.x, 0, point.x, SCREEN_HEIGHT); 
+			 point.x = gsynth->screenWidth * (head - (Uint8*) &sound[0]) / (SIZE * sizeof(Sint16));
+			 SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+			 SDL_RenderDrawLine( renderer, point.x, 0, point.x, gsynth->screenHeight); 
 		 */
 
 		SDL_RenderPresent( renderer );
