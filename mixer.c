@@ -11,8 +11,8 @@ KeyMap * initKeyMap( KeyMap * keyMap) {
 	SDL_Color white = {0xFF, 0xFF, 0xFF, 0xFF};
 	SDL_Color black = {0x00, 0x00, 0x00, 0xFF};
 
-	SDL_Rect whiteKey = { 0, SCREEN_HEIGHT / 2, SCREEN_WIDTH / 9, SCREEN_HEIGHT / 2 };
-	SDL_Rect blackKey = { SCREEN_WIDTH / 9 / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH / 9, SCREEN_HEIGHT / 2 };
+	SDL_Rect whiteKey = { 0, YHOP, XHOP, YHOP };
+	SDL_Rect blackKey = { XHOP / 2, YHOP, XHOP, YHOP / 2 };
 
 	/* Set every key to it's correct color i.e. white/black. */
 	keyMap->keys[ SDLK_a % keyMap->size ].color = white;
@@ -30,36 +30,53 @@ KeyMap * initKeyMap( KeyMap * keyMap) {
 	keyMap->keys[ SDLK_k % keyMap->size ].color = white;
 	keyMap->keys[ SDLK_o % keyMap->size ].color = black;
 	keyMap->keys[ SDLK_l % keyMap->size ].color = white;
+	
+	keyMap->keys[ SDLK_a % keyMap->size ].paintColor = white;
+	keyMap->keys[ SDLK_w % keyMap->size ].paintColor = black;
+	keyMap->keys[ SDLK_s % keyMap->size ].paintColor = white;
+	keyMap->keys[ SDLK_e % keyMap->size ].paintColor = black;
+	keyMap->keys[ SDLK_d % keyMap->size ].paintColor = white;
+	keyMap->keys[ SDLK_f % keyMap->size ].paintColor = white;
+	keyMap->keys[ SDLK_t % keyMap->size ].paintColor = black;
+	keyMap->keys[ SDLK_g % keyMap->size ].paintColor = white;
+	keyMap->keys[ SDLK_y % keyMap->size ].paintColor = black;
+	keyMap->keys[ SDLK_h % keyMap->size ].paintColor = white;
+	keyMap->keys[ SDLK_u % keyMap->size ].paintColor = black;
+	keyMap->keys[ SDLK_j % keyMap->size ].paintColor = white;
+	keyMap->keys[ SDLK_k % keyMap->size ].paintColor = white;
+	keyMap->keys[ SDLK_o % keyMap->size ].paintColor = black;
+	keyMap->keys[ SDLK_l % keyMap->size ].paintColor = white;
 
 	/* Give it it's proper shape and location. */
 	keyMap->keys[ SDLK_a % keyMap->size ].rect = whiteKey;
-	whiteKey.x += SCREEN_WIDTH / 9;
+	whiteKey.x += XHOP;
+
 	keyMap->keys[ SDLK_w % keyMap->size ].rect = blackKey;
-	blackKey.x += SCREEN_WIDTH / 9;
+	blackKey.x += XHOP;
 	keyMap->keys[ SDLK_s % keyMap->size ].rect = whiteKey;
-	whiteKey.x += SCREEN_WIDTH / 9;
+	whiteKey.x += XHOP;
 	keyMap->keys[ SDLK_e % keyMap->size ].rect = blackKey;
-	blackKey.x += SCREEN_WIDTH / 9;
-	blackKey.x += SCREEN_WIDTH / 9;
+	blackKey.x += XHOP;
+	blackKey.x += XHOP;
 	keyMap->keys[ SDLK_d % keyMap->size ].rect = whiteKey;
-	whiteKey.x += SCREEN_WIDTH / 9;
+	whiteKey.x += XHOP;
 	keyMap->keys[ SDLK_f % keyMap->size ].rect = whiteKey;
-	whiteKey.x += SCREEN_WIDTH / 9;
+	whiteKey.x += XHOP;
 	keyMap->keys[ SDLK_t % keyMap->size ].rect = blackKey;
-	blackKey.x += SCREEN_WIDTH / 9;
+	blackKey.x += XHOP;
 	keyMap->keys[ SDLK_g % keyMap->size ].rect = whiteKey;
-	whiteKey.x += SCREEN_WIDTH / 9;
+	whiteKey.x += XHOP;
 	keyMap->keys[ SDLK_y % keyMap->size ].rect = blackKey;
-	blackKey.x += SCREEN_WIDTH / 9;
+	blackKey.x += XHOP;
 	keyMap->keys[ SDLK_h % keyMap->size ].rect = whiteKey;
-	whiteKey.x += SCREEN_WIDTH / 9;
+	whiteKey.x += XHOP;
 	keyMap->keys[ SDLK_u % keyMap->size ].rect = blackKey;
-	blackKey.x += SCREEN_WIDTH / 9;
-	blackKey.x += SCREEN_WIDTH / 9;
+	blackKey.x += XHOP;
+	blackKey.x += XHOP;
 	keyMap->keys[ SDLK_j % keyMap->size ].rect = whiteKey;
-	whiteKey.x += SCREEN_WIDTH / 9;
+	whiteKey.x += XHOP;
 	keyMap->keys[ SDLK_k % keyMap->size ].rect = whiteKey;
-	whiteKey.x += SCREEN_WIDTH / 9;
+	whiteKey.x += XHOP;
 	keyMap->keys[ SDLK_o % keyMap->size ].rect = blackKey;
 	keyMap->keys[ SDLK_l % keyMap->size ].rect = whiteKey;
 
@@ -115,6 +132,9 @@ int insertKey( KeyMap * keyMap, SDL_Keycode key ){
 
 	keyMap->listTail = node;
 	keyMap->count++;
+
+	node->paintColor = (SDL_Color) { 0xFF, 0x0, 0x0, 0xFF };
+	
 	//printf("count: %d\n",keyMap->count);
 
 	return 0;
@@ -144,6 +164,9 @@ int removeKey( KeyMap * keyMap, SDL_Keycode key ){
 	node->key = node->next = node->prev = 0;
 
 	keyMap->count--;
+	
+	node->paintColor = node->color;
+	
 	//printf("count: %d\n",keyMap->count);
 
 	return 0;
@@ -151,13 +174,16 @@ int removeKey( KeyMap * keyMap, SDL_Keycode key ){
 }
 
 void printKeys(KeyMap * keyMap){
+
 	KeyNode * listTail = keyMap->listTail;
 	printf("count %d: ", keyMap->count);
 	while(listTail){
 		printf("%d ", listTail->key);
 		listTail = listTail->prev;
 	}
+
 	printf("\n");
+
 }
 
 /* To be called with a while loop statement i.e. while(key = getKeys(keyMap)){} */
@@ -198,13 +224,40 @@ GSynth * createGSynth() {
 
 	gsynth->screenWidth = SCREEN_WIDTH;
 	gsynth->screenHeight = SCREEN_HEIGHT;
-	
+
 	gsynth->keyMap = createKeyMap( MAPSIZE );
-	
+
 	initVoices(gsynth);
 	prepareVoices(gsynth);
+	
+	initPiano(gsynth);
+
+	gsynth->shouldRender = 1;
 
 	return gsynth;
+
+}
+
+void initPiano( GSynth * gsynth ) {
+	
+	/* White Keys should render first. */
+	gsynth->piano [0] = &gsynth->keyMap->keys[ SDLK_a % gsynth->keyMap->size ];
+	gsynth->piano [1] = &gsynth->keyMap->keys[ SDLK_s % gsynth->keyMap->size ];
+	gsynth->piano [2] = &gsynth->keyMap->keys[ SDLK_d % gsynth->keyMap->size ];
+	gsynth->piano [3] = &gsynth->keyMap->keys[ SDLK_f % gsynth->keyMap->size ];
+	gsynth->piano [4] = &gsynth->keyMap->keys[ SDLK_g % gsynth->keyMap->size ];
+	gsynth->piano [5] = &gsynth->keyMap->keys[ SDLK_h % gsynth->keyMap->size ];
+	gsynth->piano [6] = &gsynth->keyMap->keys[ SDLK_j % gsynth->keyMap->size ];
+	gsynth->piano [7] = &gsynth->keyMap->keys[ SDLK_k % gsynth->keyMap->size ];
+	gsynth->piano [8] = &gsynth->keyMap->keys[ SDLK_l % gsynth->keyMap->size ];
+
+	/* Black Keys. */
+	gsynth->piano [9] = &gsynth->keyMap->keys[ SDLK_w % gsynth->keyMap->size ];
+	gsynth->piano [10] = &gsynth->keyMap->keys[ SDLK_e % gsynth->keyMap->size ];
+	gsynth->piano [11] = &gsynth->keyMap->keys[ SDLK_t % gsynth->keyMap->size ];
+	gsynth->piano [12] = &gsynth->keyMap->keys[ SDLK_y % gsynth->keyMap->size ];
+	gsynth->piano [13] = &gsynth->keyMap->keys[ SDLK_u % gsynth->keyMap->size ];
+	gsynth->piano [14] = &gsynth->keyMap->keys[ SDLK_o % gsynth->keyMap->size ];
 
 }
 
@@ -303,6 +356,8 @@ void updateGraphics( GSynth * gsynth ){
 	SDL_Keycode * key;
 	int voiceIndex;
 
+	gsynth->shouldRender = 1;
+
 	memset( gsynth->points, 0, sizeof(SDL_Point) * RATE);
 
 	while((key = getKeys(gsynth->keyMap))) {
@@ -314,10 +369,11 @@ void updateGraphics( GSynth * gsynth ){
 			/* TODO - Fix the math and drawing bug. */
 
 			gsynth->points[i].x = gsynth->screenWidth * i / (RATE / ZOOM);
-			gsynth->points[i].y += ((float) gsynth->screenHeight / (float) gsynth->keyMap->count)
-				* (((int) gsynth->sound[voiceIndex][CHANNELS*i] + (int) 0x00008000) / (float) 0x0000FFFF);
+			gsynth->points[i].y += (double) ((double) gsynth->screenHeight / 2 / (double) gsynth->keyMap->count)
+				* (double) (((int) gsynth->sound[voiceIndex][CHANNELS*i] + (int) 0x00008000) / (double) 0x0000FFFF);
 
 		}
+
 
 	}
 
@@ -325,3 +381,47 @@ void updateGraphics( GSynth * gsynth ){
 
 }
 
+void renderGSynth( GSynth * gsynth, SDL_Renderer * renderer){
+
+		SDL_Color * color;
+		SDL_Rect * rect;
+
+		/* Render if the shouldRender flag is set. */
+
+		if(gsynth->shouldRender){
+
+			/* Clear the renderer with draw color. */
+
+			SDL_SetRenderDrawColor( renderer, 0x00, 0x00, 0x00, 0xFF );
+			SDL_RenderClear( renderer );
+
+			/* Draw Wave Form. */
+			SDL_SetRenderDrawColor( renderer, 0x00, 0xFF, 0x00, 0xFF );
+			SDL_RenderDrawLines( renderer, gsynth->points, RATE/ZOOM );
+
+			/* Draw Piano Roll. */
+			for(int i = 0; i < VOICES; i++) {
+			
+				color = &gsynth->piano[i]->paintColor;
+				rect = &gsynth->piano[i]->rect;
+
+				SDL_SetRenderDrawColor( renderer, color->r, color->g, color->b, color->a );
+				SDL_RenderFillRect( renderer, rect );
+				SDL_SetRenderDrawColor( renderer, 0x00, 0xFF, 0x00, 0xFF );
+				SDL_RenderDrawRect( renderer, rect );
+
+			}
+
+			/* Draw a track head.
+				 point.x = gsynth->screenWidth * (head - (Uint8*) &sound[0]) / (SIZE * sizeof(Sint16));
+				 SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+				 SDL_RenderDrawLine( renderer, point.x, 0, point.x, gsynth->screenHeight); 
+			 */
+
+			SDL_RenderPresent( renderer );
+
+			gsynth->shouldRender = 0;
+
+		}
+
+}

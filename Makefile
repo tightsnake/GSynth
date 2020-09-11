@@ -2,7 +2,6 @@ INC = -IC:/MySDL/include
 LIB = -LC:/MySDL/lib
 FLAGS = -lmingw32 -lSDL2main -lSDL2 -g -Wall
 
-
 GSynth: main.o mixer.o
 	gcc main.o mixer.o -o GSynth $(INC) $(LIB) $(FLAGS)
 

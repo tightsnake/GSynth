@@ -10,7 +10,6 @@ int main(int argc, char* argv[]) {
 
 	SDL_Window * window;
 	SDL_Renderer * renderer;
-	SDL_Event event;
 	SDL_AudioSpec spec;
 	SDL_AudioDeviceID device;
 
@@ -20,19 +19,21 @@ int main(int argc, char* argv[]) {
 
 	int dcount;
 
+	/* Pass along the GSynth object as the Audio Spec. user data. */
+
 	createSpec(&spec, RATE, AUDIO_S16LSB, CHANNELS, 4096, mixBuffer, gsynth);
 
 	if(SDL_Init(SDL_INIT_VIDEO)){
 
 		printf("SDL could not initialize video: %s\n", SDL_GetError());
-		//return EXIT_FAILURE;
+		return EXIT_FAILURE;
 
 	}
 
 	if(SDL_Init(SDL_INIT_AUDIO)){
 
 		printf("SDL could not initialize audio: %s\n", SDL_GetError());
-		//return EXIT_FAILURE;
+		return EXIT_FAILURE;
 
 	}
 
@@ -48,7 +49,7 @@ int main(int argc, char* argv[]) {
 	if(device){
 
 		printf("Could not open audio device: %s\n", SDL_GetError());
-		//return EXIT_FAILURE;
+		return EXIT_FAILURE;
 
 	}
 
@@ -80,17 +81,17 @@ int main(int argc, char* argv[]) {
 
 	while(running){
 
-		while(SDL_PollEvent(&event)){
+		while(SDL_PollEvent(&gsynth->event)){
 
-			if(event.type == SDL_QUIT){
+			if(gsynth->event.type == SDL_QUIT){
 
 				running = 0;
 
 			}
 
-			if(event.type == SDL_KEYDOWN){
+			if(gsynth->event.type == SDL_KEYDOWN){
 
-				switch(event.key.keysym.sym){
+				switch(gsynth->event.key.keysym.sym){
 
 					case SDLK_l:
 					case SDLK_o:
@@ -110,9 +111,8 @@ int main(int argc, char* argv[]) {
 
 						/* TODO - Logic Block in Question. */
 
-						insertKey(gsynth->keyMap, event.key.keysym.sym);
+						insertKey(gsynth->keyMap, gsynth->event.key.keysym.sym);
 
-						printKeys(gsynth->keyMap);
 
 						if(gsynth->keyMap->lastCount != gsynth->keyMap->count){
 
@@ -145,12 +145,11 @@ int main(int argc, char* argv[]) {
 						break;
 
 				}
-				//printKeys(gsynth->keyMap);
 			}
 
-			if(event.type == SDL_KEYUP){
+			if(gsynth->event.type == SDL_KEYUP){
 
-				switch(event.key.keysym.sym){
+				switch(gsynth->event.key.keysym.sym){
 
 					case SDLK_l:
 					case SDLK_o:
@@ -168,9 +167,7 @@ int main(int argc, char* argv[]) {
 					case SDLK_w:
 					case SDLK_a:
 
-						removeKey(gsynth->keyMap, event.key.keysym.sym);
-
-						printKeys(gsynth->keyMap);
+						removeKey(gsynth->keyMap, gsynth->event.key.keysym.sym);
 
 						if(gsynth->keyMap->lastCount != gsynth->keyMap->count){
 
@@ -186,33 +183,19 @@ int main(int argc, char* argv[]) {
 						break;
 
 				}
-				//printKeys(gsynth->keyMap);
 			}
 
-			if(event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED){
+			if(gsynth->event.type == SDL_WINDOWEVENT && gsynth->event.window.event == SDL_WINDOWEVENT_RESIZED){
 
-				gsynth->screenWidth = event.window.data1;
-				gsynth->screenHeight = event.window.data2;
+				gsynth->screenWidth = gsynth->event.window.data1;
+				gsynth->screenHeight = gsynth->event.window.data2;
 				SDL_SetWindowSize( window, gsynth->screenWidth, gsynth->screenHeight );
 
 			}
 
 		}
 
-		SDL_SetRenderDrawColor( renderer, 0x00, 0x00, 0x00, 0xFF );
-		SDL_RenderClear( renderer );
-
-		/* Draw Wave Form. */
-		SDL_SetRenderDrawColor( renderer, 0x00, 0xFF, 0x00, 0xFF );
-		SDL_RenderDrawLines( renderer, gsynth->points, RATE/ZOOM );
-
-		/* Draw a track head.
-			 point.x = gsynth->screenWidth * (head - (Uint8*) &sound[0]) / (SIZE * sizeof(Sint16));
-			 SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
-			 SDL_RenderDrawLine( renderer, point.x, 0, point.x, gsynth->screenHeight); 
-		 */
-
-		SDL_RenderPresent( renderer );
+		renderGSynth( gsynth, renderer );
 
 	}
 
