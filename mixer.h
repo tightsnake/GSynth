@@ -31,8 +31,7 @@ Author: Chris Lefkarites
 #define SCREEN_WIDTH 1200
 #define SCREEN_HEIGHT 400
 
-#define YHOP SCREEN_HEIGHT / 2
-#define XHOP SCREEN_WIDTH / 9
+#define MODULES 2
 
 typedef enum { C = 262, Cs = 277, D = 294, Ds = 311, E = 330,
 	F = 349, Fs = 370, G = 392, Gs = 415, A = 440, As = 466, B = 494 } Tone;
@@ -53,6 +52,7 @@ typedef struct{
 	int size, count, lastCount;
 	KeyNode * keys;
 	KeyNode * listTail;
+	int hash [VOICES];
 } KeyMap;
 
 typedef struct{
@@ -67,10 +67,12 @@ typedef struct{
 	int shouldRender;
 	SDL_Event event;
 	KeyNode * piano [VOICES];
+	SDL_Rect modules [MODULES];
 } GSynth;
 
 /* KeyMap functions. */
-KeyMap * initKeyMap( KeyMap * keyMap);
+KeyMap * initKeyMap( KeyMap * keyMap );
+KeyMap * updateKeyMapDim( KeyMap * keyMap, int screenWidth, int screenHeight );
 KeyMap * createKeyMap( int size );
 int insertKey( KeyMap * keyMap, SDL_Keycode key );
 int removeKey( KeyMap * keyMap, SDL_Keycode key );

@@ -6,95 +6,121 @@ Author: Chris Lefkarites
 
 #include "mixer.h"
 
-KeyMap * initKeyMap( KeyMap * keyMap) { 
+KeyMap * initKeyMap( KeyMap * keyMap ) {
 
 	SDL_Color white = {0xFF, 0xFF, 0xFF, 0xFF};
 	SDL_Color black = {0x00, 0x00, 0x00, 0xFF};
 
-	SDL_Rect whiteKey = { 0, YHOP, XHOP, YHOP };
-	SDL_Rect blackKey = { XHOP / 2, YHOP, XHOP, YHOP / 2 };
+	/* Pre-Compute the hash values that will be used as input. 
+	0 to 14 : keyboard piano roll. */
+	keyMap->hash[0]  = SDLK_a % keyMap->size;
+	keyMap->hash[1]  = SDLK_w % keyMap->size;
+	keyMap->hash[2]  = SDLK_s % keyMap->size;
+	keyMap->hash[3]  = SDLK_e % keyMap->size;
+	keyMap->hash[4]  = SDLK_d % keyMap->size;
+	keyMap->hash[5]  = SDLK_f % keyMap->size;
+	keyMap->hash[6]  = SDLK_t % keyMap->size;
+	keyMap->hash[7]  = SDLK_g % keyMap->size;
+	keyMap->hash[8]  = SDLK_y % keyMap->size;
+	keyMap->hash[9]  = SDLK_h % keyMap->size;
+	keyMap->hash[10] = SDLK_u % keyMap->size;
+	keyMap->hash[11] = SDLK_j % keyMap->size;
+	keyMap->hash[12] = SDLK_k % keyMap->size;
+	keyMap->hash[13] = SDLK_o % keyMap->size;
+	keyMap->hash[14] = SDLK_l % keyMap->size;
 
 	/* Set every key to it's correct color i.e. white/black. */
-	keyMap->keys[ SDLK_a % keyMap->size ].color = white;
-	keyMap->keys[ SDLK_w % keyMap->size ].color = black;
-	keyMap->keys[ SDLK_s % keyMap->size ].color = white;
-	keyMap->keys[ SDLK_e % keyMap->size ].color = black;
-	keyMap->keys[ SDLK_d % keyMap->size ].color = white;
-	keyMap->keys[ SDLK_f % keyMap->size ].color = white;
-	keyMap->keys[ SDLK_t % keyMap->size ].color = black;
-	keyMap->keys[ SDLK_g % keyMap->size ].color = white;
-	keyMap->keys[ SDLK_y % keyMap->size ].color = black;
-	keyMap->keys[ SDLK_h % keyMap->size ].color = white;
-	keyMap->keys[ SDLK_u % keyMap->size ].color = black;
-	keyMap->keys[ SDLK_j % keyMap->size ].color = white;
-	keyMap->keys[ SDLK_k % keyMap->size ].color = white;
-	keyMap->keys[ SDLK_o % keyMap->size ].color = black;
-	keyMap->keys[ SDLK_l % keyMap->size ].color = white;
+	keyMap->keys[ keyMap->hash[0] ].color = white;
+	keyMap->keys[ keyMap->hash[1] ].color = black;
+	keyMap->keys[ keyMap->hash[2] ].color = white;
+	keyMap->keys[ keyMap->hash[3] ].color = black;
+	keyMap->keys[ keyMap->hash[4] ].color = white;
+	keyMap->keys[ keyMap->hash[5] ].color = white;
+	keyMap->keys[ keyMap->hash[6] ].color = black;
+	keyMap->keys[ keyMap->hash[7] ].color = white;
+	keyMap->keys[ keyMap->hash[8] ].color = black;
+	keyMap->keys[ keyMap->hash[9] ].color = white;
+	keyMap->keys[ keyMap->hash[10] ].color = black;
+	keyMap->keys[ keyMap->hash[11] ].color = white;
+	keyMap->keys[ keyMap->hash[12] ].color = white;
+	keyMap->keys[ keyMap->hash[13] ].color = black;
+	keyMap->keys[ keyMap->hash[14] ].color = white;
 	
-	keyMap->keys[ SDLK_a % keyMap->size ].paintColor = white;
-	keyMap->keys[ SDLK_w % keyMap->size ].paintColor = black;
-	keyMap->keys[ SDLK_s % keyMap->size ].paintColor = white;
-	keyMap->keys[ SDLK_e % keyMap->size ].paintColor = black;
-	keyMap->keys[ SDLK_d % keyMap->size ].paintColor = white;
-	keyMap->keys[ SDLK_f % keyMap->size ].paintColor = white;
-	keyMap->keys[ SDLK_t % keyMap->size ].paintColor = black;
-	keyMap->keys[ SDLK_g % keyMap->size ].paintColor = white;
-	keyMap->keys[ SDLK_y % keyMap->size ].paintColor = black;
-	keyMap->keys[ SDLK_h % keyMap->size ].paintColor = white;
-	keyMap->keys[ SDLK_u % keyMap->size ].paintColor = black;
-	keyMap->keys[ SDLK_j % keyMap->size ].paintColor = white;
-	keyMap->keys[ SDLK_k % keyMap->size ].paintColor = white;
-	keyMap->keys[ SDLK_o % keyMap->size ].paintColor = black;
-	keyMap->keys[ SDLK_l % keyMap->size ].paintColor = white;
+	keyMap->keys[ keyMap->hash[0] ].paintColor = white;
+	keyMap->keys[ keyMap->hash[1] ].paintColor = black;
+	keyMap->keys[ keyMap->hash[2] ].paintColor = white;
+	keyMap->keys[ keyMap->hash[3] ].paintColor = black;
+	keyMap->keys[ keyMap->hash[4] ].paintColor = white;
+	keyMap->keys[ keyMap->hash[5] ].paintColor = white;
+	keyMap->keys[ keyMap->hash[6] ].paintColor = black;
+	keyMap->keys[ keyMap->hash[7] ].paintColor = white;
+	keyMap->keys[ keyMap->hash[8] ].paintColor = black;
+	keyMap->keys[ keyMap->hash[9] ].paintColor = white;
+	keyMap->keys[ keyMap->hash[10] ].paintColor = black;
+	keyMap->keys[ keyMap->hash[11] ].paintColor = white;
+	keyMap->keys[ keyMap->hash[12] ].paintColor = white;
+	keyMap->keys[ keyMap->hash[13] ].paintColor = black;
+	keyMap->keys[ keyMap->hash[14] ].paintColor = white;
+
+	keyMap->keys[ keyMap->hash[0] ].voiceIndex = 0;
+	keyMap->keys[ keyMap->hash[1] ].voiceIndex = 1;
+	keyMap->keys[ keyMap->hash[2] ].voiceIndex = 2;
+	keyMap->keys[ keyMap->hash[3] ].voiceIndex = 3;
+	keyMap->keys[ keyMap->hash[4] ].voiceIndex = 4;
+	keyMap->keys[ keyMap->hash[5] ].voiceIndex = 5;
+	keyMap->keys[ keyMap->hash[6] ].voiceIndex = 6;
+	keyMap->keys[ keyMap->hash[7] ].voiceIndex = 7;
+	keyMap->keys[ keyMap->hash[8] ].voiceIndex = 8;
+	keyMap->keys[ keyMap->hash[9] ].voiceIndex = 9;
+	keyMap->keys[ keyMap->hash[10] ].voiceIndex = 10;
+	keyMap->keys[ keyMap->hash[11] ].voiceIndex = 11;
+	keyMap->keys[ keyMap->hash[12] ].voiceIndex = 12;
+	keyMap->keys[ keyMap->hash[13] ].voiceIndex = 13;
+	keyMap->keys[ keyMap->hash[14] ].voiceIndex = 14;
+
+	return keyMap;
+
+}
+
+KeyMap * updateKeyMapDim( KeyMap * keyMap, int screenWidth, int screenHeight ){
+
+	int xHop = screenWidth / 9;
+	int yHop = screenHeight / 2;
+
+	SDL_Rect whiteKey = { 0, yHop, xHop, yHop };
+	SDL_Rect blackKey = { xHop / 2, yHop, xHop, yHop / 2 };
 
 	/* Give it it's proper shape and location. */
-	keyMap->keys[ SDLK_a % keyMap->size ].rect = whiteKey;
-	whiteKey.x += XHOP;
-
-	keyMap->keys[ SDLK_w % keyMap->size ].rect = blackKey;
-	blackKey.x += XHOP;
-	keyMap->keys[ SDLK_s % keyMap->size ].rect = whiteKey;
-	whiteKey.x += XHOP;
-	keyMap->keys[ SDLK_e % keyMap->size ].rect = blackKey;
-	blackKey.x += XHOP;
-	blackKey.x += XHOP;
-	keyMap->keys[ SDLK_d % keyMap->size ].rect = whiteKey;
-	whiteKey.x += XHOP;
-	keyMap->keys[ SDLK_f % keyMap->size ].rect = whiteKey;
-	whiteKey.x += XHOP;
-	keyMap->keys[ SDLK_t % keyMap->size ].rect = blackKey;
-	blackKey.x += XHOP;
-	keyMap->keys[ SDLK_g % keyMap->size ].rect = whiteKey;
-	whiteKey.x += XHOP;
-	keyMap->keys[ SDLK_y % keyMap->size ].rect = blackKey;
-	blackKey.x += XHOP;
-	keyMap->keys[ SDLK_h % keyMap->size ].rect = whiteKey;
-	whiteKey.x += XHOP;
-	keyMap->keys[ SDLK_u % keyMap->size ].rect = blackKey;
-	blackKey.x += XHOP;
-	blackKey.x += XHOP;
-	keyMap->keys[ SDLK_j % keyMap->size ].rect = whiteKey;
-	whiteKey.x += XHOP;
-	keyMap->keys[ SDLK_k % keyMap->size ].rect = whiteKey;
-	whiteKey.x += XHOP;
-	keyMap->keys[ SDLK_o % keyMap->size ].rect = blackKey;
-	keyMap->keys[ SDLK_l % keyMap->size ].rect = whiteKey;
-
-	keyMap->keys[ SDLK_a % keyMap->size ].voiceIndex = 0;
-	keyMap->keys[ SDLK_w % keyMap->size ].voiceIndex = 1;
-	keyMap->keys[ SDLK_s % keyMap->size ].voiceIndex = 2;
-	keyMap->keys[ SDLK_e % keyMap->size ].voiceIndex = 3;
-	keyMap->keys[ SDLK_d % keyMap->size ].voiceIndex = 4;
-	keyMap->keys[ SDLK_f % keyMap->size ].voiceIndex = 5;
-	keyMap->keys[ SDLK_t % keyMap->size ].voiceIndex = 6;
-	keyMap->keys[ SDLK_g % keyMap->size ].voiceIndex = 7;
-	keyMap->keys[ SDLK_y % keyMap->size ].voiceIndex = 8;
-	keyMap->keys[ SDLK_h % keyMap->size ].voiceIndex = 9;
-	keyMap->keys[ SDLK_u % keyMap->size ].voiceIndex = 10;
-	keyMap->keys[ SDLK_j % keyMap->size ].voiceIndex = 11;
-	keyMap->keys[ SDLK_k % keyMap->size ].voiceIndex = 12;
-	keyMap->keys[ SDLK_o % keyMap->size ].voiceIndex = 13;
-	keyMap->keys[ SDLK_l % keyMap->size ].voiceIndex = 14;
+	keyMap->keys[ keyMap->hash[0] ].rect = whiteKey;
+	whiteKey.x += xHop;
+	keyMap->keys[ keyMap->hash[1] ].rect = blackKey;
+	blackKey.x += xHop;
+	keyMap->keys[ keyMap->hash[2] ].rect = whiteKey;
+	whiteKey.x += xHop;
+	keyMap->keys[ keyMap->hash[3] ].rect = blackKey;
+	blackKey.x += xHop;
+	blackKey.x += xHop;
+	keyMap->keys[ keyMap->hash[4] ].rect = whiteKey;
+	whiteKey.x += xHop;
+	keyMap->keys[ keyMap->hash[5] ].rect = whiteKey;
+	whiteKey.x += xHop;
+	keyMap->keys[ keyMap->hash[6] ].rect = blackKey;
+	blackKey.x += xHop;
+	keyMap->keys[ keyMap->hash[7] ].rect = whiteKey;
+	whiteKey.x += xHop;
+	keyMap->keys[ keyMap->hash[8] ].rect = blackKey;
+	blackKey.x += xHop;
+	keyMap->keys[ keyMap->hash[9] ].rect = whiteKey;
+	whiteKey.x += xHop;
+	keyMap->keys[ keyMap->hash[10] ].rect = blackKey;
+	blackKey.x += xHop;
+	blackKey.x += xHop;
+	keyMap->keys[ keyMap->hash[11] ].rect = whiteKey;
+	whiteKey.x += xHop;
+	keyMap->keys[ keyMap->hash[12] ].rect = whiteKey;
+	whiteKey.x += xHop;
+	keyMap->keys[ keyMap->hash[13] ].rect = blackKey;
+	keyMap->keys[ keyMap->hash[14] ].rect = whiteKey;
 
 	return keyMap;
 
@@ -226,6 +252,7 @@ GSynth * createGSynth() {
 	gsynth->screenHeight = SCREEN_HEIGHT;
 
 	gsynth->keyMap = createKeyMap( MAPSIZE );
+	updateKeyMapDim( gsynth->keyMap, gsynth->screenWidth, gsynth->screenHeight );
 
 	initVoices(gsynth);
 	prepareVoices(gsynth);
@@ -241,23 +268,23 @@ GSynth * createGSynth() {
 void initPiano( GSynth * gsynth ) {
 	
 	/* White Keys should render first. */
-	gsynth->piano [0] = &gsynth->keyMap->keys[ SDLK_a % gsynth->keyMap->size ];
-	gsynth->piano [1] = &gsynth->keyMap->keys[ SDLK_s % gsynth->keyMap->size ];
-	gsynth->piano [2] = &gsynth->keyMap->keys[ SDLK_d % gsynth->keyMap->size ];
-	gsynth->piano [3] = &gsynth->keyMap->keys[ SDLK_f % gsynth->keyMap->size ];
-	gsynth->piano [4] = &gsynth->keyMap->keys[ SDLK_g % gsynth->keyMap->size ];
-	gsynth->piano [5] = &gsynth->keyMap->keys[ SDLK_h % gsynth->keyMap->size ];
-	gsynth->piano [6] = &gsynth->keyMap->keys[ SDLK_j % gsynth->keyMap->size ];
-	gsynth->piano [7] = &gsynth->keyMap->keys[ SDLK_k % gsynth->keyMap->size ];
-	gsynth->piano [8] = &gsynth->keyMap->keys[ SDLK_l % gsynth->keyMap->size ];
+	gsynth->piano [0] = &gsynth->keyMap->keys[ gsynth->keyMap->hash[0] ];
+	gsynth->piano [1] = &gsynth->keyMap->keys[ gsynth->keyMap->hash[2] ];
+	gsynth->piano [2] = &gsynth->keyMap->keys[ gsynth->keyMap->hash[4] ];
+	gsynth->piano [3] = &gsynth->keyMap->keys[ gsynth->keyMap->hash[5] ];
+	gsynth->piano [4] = &gsynth->keyMap->keys[ gsynth->keyMap->hash[7] ];
+	gsynth->piano [5] = &gsynth->keyMap->keys[ gsynth->keyMap->hash[9] ];
+	gsynth->piano [6] = &gsynth->keyMap->keys[ gsynth->keyMap->hash[11] ];
+	gsynth->piano [7] = &gsynth->keyMap->keys[ gsynth->keyMap->hash[12] ];
+	gsynth->piano [8] = &gsynth->keyMap->keys[ gsynth->keyMap->hash[14] ];
 
 	/* Black Keys. */
-	gsynth->piano [9] = &gsynth->keyMap->keys[ SDLK_w % gsynth->keyMap->size ];
-	gsynth->piano [10] = &gsynth->keyMap->keys[ SDLK_e % gsynth->keyMap->size ];
-	gsynth->piano [11] = &gsynth->keyMap->keys[ SDLK_t % gsynth->keyMap->size ];
-	gsynth->piano [12] = &gsynth->keyMap->keys[ SDLK_y % gsynth->keyMap->size ];
-	gsynth->piano [13] = &gsynth->keyMap->keys[ SDLK_u % gsynth->keyMap->size ];
-	gsynth->piano [14] = &gsynth->keyMap->keys[ SDLK_o % gsynth->keyMap->size ];
+	gsynth->piano [9] = &gsynth->keyMap->keys[ gsynth->keyMap->hash[1] ];
+	gsynth->piano [10] = &gsynth->keyMap->keys[ gsynth->keyMap->hash[3] ];
+	gsynth->piano [11] = &gsynth->keyMap->keys[ gsynth->keyMap->hash[6] ];
+	gsynth->piano [12] = &gsynth->keyMap->keys[ gsynth->keyMap->hash[8] ];
+	gsynth->piano [13] = &gsynth->keyMap->keys[ gsynth->keyMap->hash[10] ];
+	gsynth->piano [14] = &gsynth->keyMap->keys[ gsynth->keyMap->hash[13] ];
 
 }
 
@@ -395,9 +422,10 @@ void renderGSynth( GSynth * gsynth, SDL_Renderer * renderer){
 			SDL_SetRenderDrawColor( renderer, 0x00, 0x00, 0x00, 0xFF );
 			SDL_RenderClear( renderer );
 
-			/* Draw Wave Form. */
+			/* Draw Wave Form. 
 			SDL_SetRenderDrawColor( renderer, 0x00, 0xFF, 0x00, 0xFF );
 			SDL_RenderDrawLines( renderer, gsynth->points, RATE/ZOOM );
+			*/
 
 			/* Draw Piano Roll. */
 			for(int i = 0; i < VOICES; i++) {
@@ -411,12 +439,6 @@ void renderGSynth( GSynth * gsynth, SDL_Renderer * renderer){
 				SDL_RenderDrawRect( renderer, rect );
 
 			}
-
-			/* Draw a track head.
-				 point.x = gsynth->screenWidth * (head - (Uint8*) &sound[0]) / (SIZE * sizeof(Sint16));
-				 SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
-				 SDL_RenderDrawLine( renderer, point.x, 0, point.x, gsynth->screenHeight); 
-			 */
 
 			SDL_RenderPresent( renderer );
 
