@@ -190,7 +190,8 @@ int main(int argc, char* argv[]) {
 				gsynth->screenWidth = gsynth->event.window.data1;
 				gsynth->screenHeight = gsynth->event.window.data2;
 				SDL_SetWindowSize( window, gsynth->screenWidth, gsynth->screenHeight );
-
+				updateKeyMapDim( gsynth->keyMap, gsynth->screenWidth, gsynth->screenHeight );
+				gsynth->shouldRender = 1;
 			}
 
 		}

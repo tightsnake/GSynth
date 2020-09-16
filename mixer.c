@@ -378,6 +378,7 @@ void prepareVoices( GSynth * gsynth){ //TODO
 
 }
 
+/* TODO */
 void updateGraphics( GSynth * gsynth ){
 
 	SDL_Keycode * key;
@@ -408,6 +409,7 @@ void updateGraphics( GSynth * gsynth ){
 
 }
 
+/* TODO */
 void renderGSynth( GSynth * gsynth, SDL_Renderer * renderer){
 
 		SDL_Color * color;
@@ -422,10 +424,9 @@ void renderGSynth( GSynth * gsynth, SDL_Renderer * renderer){
 			SDL_SetRenderDrawColor( renderer, 0x00, 0x00, 0x00, 0xFF );
 			SDL_RenderClear( renderer );
 
-			/* Draw Wave Form. 
+			/* Draw Wave Form. */
 			SDL_SetRenderDrawColor( renderer, 0x00, 0xFF, 0x00, 0xFF );
 			SDL_RenderDrawLines( renderer, gsynth->points, RATE/ZOOM );
-			*/
 
 			/* Draw Piano Roll. */
 			for(int i = 0; i < VOICES; i++) {
