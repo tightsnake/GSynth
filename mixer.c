@@ -12,7 +12,7 @@ KeyMap * initKeyMap( KeyMap * keyMap ) {
 	SDL_Color black = {0x00, 0x00, 0x00, 0xFF};
 
 	/* Pre-Compute the hash values that will be used as input. 
-	0 to 14 : keyboard piano roll. */
+		 0 to 14 : keyboard piano roll. */
 	keyMap->hash[0]  = SDLK_a % keyMap->size;
 	keyMap->hash[1]  = SDLK_w % keyMap->size;
 	keyMap->hash[2]  = SDLK_s % keyMap->size;
@@ -45,7 +45,7 @@ KeyMap * initKeyMap( KeyMap * keyMap ) {
 	keyMap->keys[ keyMap->hash[12] ].color = white;
 	keyMap->keys[ keyMap->hash[13] ].color = black;
 	keyMap->keys[ keyMap->hash[14] ].color = white;
-	
+
 	keyMap->keys[ keyMap->hash[0] ].paintColor = white;
 	keyMap->keys[ keyMap->hash[1] ].paintColor = black;
 	keyMap->keys[ keyMap->hash[2] ].paintColor = white;
@@ -160,7 +160,7 @@ int insertKey( KeyMap * keyMap, SDL_Keycode key ){
 	keyMap->count++;
 
 	node->paintColor = (SDL_Color) { 0xFF, 0x0, 0x0, 0xFF };
-	
+
 	//printf("count: %d\n",keyMap->count);
 
 	return 0;
@@ -190,9 +190,9 @@ int removeKey( KeyMap * keyMap, SDL_Keycode key ){
 	node->key = node->next = node->prev = 0;
 
 	keyMap->count--;
-	
+
 	node->paintColor = node->color;
-	
+
 	//printf("count: %d\n",keyMap->count);
 
 	return 0;
@@ -256,7 +256,7 @@ GSynth * createGSynth() {
 
 	initVoices(gsynth);
 	prepareVoices(gsynth);
-	
+
 	initPiano(gsynth);
 
 	gsynth->shouldRender = 1;
@@ -266,7 +266,7 @@ GSynth * createGSynth() {
 }
 
 void initPiano( GSynth * gsynth ) {
-	
+
 	/* White Keys should render first. */
 	gsynth->piano [0] = &gsynth->keyMap->keys[ gsynth->keyMap->hash[0] ];
 	gsynth->piano [1] = &gsynth->keyMap->keys[ gsynth->keyMap->hash[2] ];
@@ -360,7 +360,8 @@ void prepareVoices( GSynth * gsynth){ //TODO
 
 			for(int j = 0; j < CHANNELS; j++){
 
-				gsynth->sound [k][i+j] = 0x7FFF * sin( 2 * PI * round(pow(2,gsynth->octave) * FREQ[k]) * i / SIZE);
+				gsynth->sound [k][i+j] = 0x7FFF * 
+					sin( 2 * PI * round(pow(2,gsynth->octave) * FREQ[k]) * i / SIZE);
 
 			}
 
@@ -409,42 +410,50 @@ void updateGraphics( GSynth * gsynth ){
 
 }
 
+void renderPianoRoll( GSynth * gsynth, SDL_Renderer * renderer ) {
+
+	SDL_Color * color;
+	SDL_Rect * rect;
+
+	for(int i = 0; i < VOICES; i++) {
+
+		color = &gsynth->piano[i]->paintColor;
+		rect = &gsynth->piano[i]->rect;
+
+		SDL_SetRenderDrawColor( renderer, color->r, color->g, color->b, color->a );
+		SDL_RenderFillRect( renderer, rect );
+		SDL_SetRenderDrawColor( renderer, 0x00, 0xFF, 0x00, 0xFF );
+		SDL_RenderDrawRect( renderer, rect );
+
+	}
+
+}
+
 /* TODO */
 void renderGSynth( GSynth * gsynth, SDL_Renderer * renderer){
 
-		SDL_Color * color;
-		SDL_Rect * rect;
+	/* Render if the shouldRender flag is set. */
 
-		/* Render if the shouldRender flag is set. */
+	if(gsynth->shouldRender){
 
-		if(gsynth->shouldRender){
+		/* Clear the renderer with draw color. */
 
-			/* Clear the renderer with draw color. */
+		SDL_SetRenderDrawColor( renderer, 0x00, 0x00, 0x00, 0xFF );
+		SDL_RenderClear( renderer );
 
-			SDL_SetRenderDrawColor( renderer, 0x00, 0x00, 0x00, 0xFF );
-			SDL_RenderClear( renderer );
+		/* Draw Wave Form. */
+		SDL_SetRenderDrawColor( renderer, 0x00, 0xFF, 0x00, 0xFF );
+		SDL_RenderDrawLines( renderer, gsynth->points, RATE/ZOOM );
 
-			/* Draw Wave Form. */
-			SDL_SetRenderDrawColor( renderer, 0x00, 0xFF, 0x00, 0xFF );
-			SDL_RenderDrawLines( renderer, gsynth->points, RATE/ZOOM );
+		/* Draw Piano Roll. */
+		renderPianoRoll( gsynth, renderer );
 
-			/* Draw Piano Roll. */
-			for(int i = 0; i < VOICES; i++) {
-			
-				color = &gsynth->piano[i]->paintColor;
-				rect = &gsynth->piano[i]->rect;
+		/* Draw Modules. */
 
-				SDL_SetRenderDrawColor( renderer, color->r, color->g, color->b, color->a );
-				SDL_RenderFillRect( renderer, rect );
-				SDL_SetRenderDrawColor( renderer, 0x00, 0xFF, 0x00, 0xFF );
-				SDL_RenderDrawRect( renderer, rect );
+		SDL_RenderPresent( renderer );
 
-			}
+		gsynth->shouldRender = 0;
 
-			SDL_RenderPresent( renderer );
-
-			gsynth->shouldRender = 0;
-
-		}
+	}
 
 }

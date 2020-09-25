@@ -192,6 +192,7 @@ int main(int argc, char* argv[]) {
 				SDL_SetWindowSize( window, gsynth->screenWidth, gsynth->screenHeight );
 				updateKeyMapDim( gsynth->keyMap, gsynth->screenWidth, gsynth->screenHeight );
 				gsynth->shouldRender = 1;
+
 			}
 
 		}
